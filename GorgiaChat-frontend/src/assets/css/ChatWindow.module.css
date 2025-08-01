@@ -250,10 +250,6 @@
     justify-content: center;
 }
 
-.headerBtn:hover {
-    background: #0173b1;
-}
-
 .messagesArea {
     flex: 1;
     overflow-y: auto;

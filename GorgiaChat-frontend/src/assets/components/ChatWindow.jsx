@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import style from '../css/ChatWindow.module.css'
 import { MdChatBubble, MdGroups, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
+import logo from '../../../public/logo.jpg'
+import ChatMain from './ChatMain'
+import ChatListPanel from './ChatListPanel'
 
 const sidebarIcons = [
     {
@@ -48,6 +51,9 @@ const ChatWindow = () => {
     return (
         <div className={style.appBg}>
             <aside className={style.sidebar}>
+                <div style={{ marginBottom: 32 }}>
+                    <img src={logo} alt="Logo" style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4 }} />
+                </div>
                 <div className={style.sidebarIcons}>
                     {sidebarIcons.map((item, idx) => {
                         const IconComp = item.icon
@@ -75,75 +81,19 @@ const ChatWindow = () => {
                     })}
                 </div>
             </aside>
-            <section className={style.chatListPanel}>
-                <div className={style.chatListHeader}>
-                    <span className={style.chatListTitle}>Chats</span>
-                    <button className={style.newMsgBtn} title="New chat">
-                        <svg width="20" height="20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0173b1" strokeWidth="2" /><path d="M10 6v8M6 10h8" stroke="#0173b1" strokeWidth="2" strokeLinecap="round" /></svg>
-                    </button>
-                </div>
-                <div className={style.searchBar}>
-                    <svg width="18" height="18" fill="none"><circle cx="8" cy="8" r="7" stroke="#888" strokeWidth="2" /><path d="M14 14l-3-3" stroke="#888" strokeWidth="2" strokeLinecap="round" /></svg>
-                    <input type="text" placeholder="Search" />
-                </div>
-                <div className={style.chatList}>
-                    {chatList.map(chat => (
-                        <div style={{ cursor: 'pointer', marginBottom: '4px' }}
-                            key={chat.id}
-                            className={style.chatListItem + ' ' + (selectedChat.id === chat.id ? style.activeChat : '')}
-                            onClick={() => setSelectedChat(chat)}
-                        >
-                            <div className={style.avatar}>{chat.name[0]}</div>
-                            <div className={style.chatInfo}>
-                                <span className={style.chatName}>{chat.name}</span>
-                                <span className={style.lastMsg}>{chat.lastMessage}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-            <main className={style.chatMain}>
-                <header className={style.chatHeader}>
-                    <div className={style.headerAvatar}>{selectedChat.name[0]}</div>
-                    <div className={style.headerInfo}>
-                        <span className={style.headerName}>{selectedChat.name}</span>
-                        <span className={style.headerStatus}>Online</span>
-                    </div>
-                    <div className={style.headerActions}>
-                        <button className={style.headerBtn} title="Call">
-                            <svg width="20" height="20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0173b1" strokeWidth="2" /><path d="M7 13l6-6M13 13l-6-6" stroke="#0173b1" strokeWidth="2" strokeLinecap="round" /></svg>
-                        </button>
-                        <button className={style.headerBtn} title="More">
-                            <svg width="20" height="20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0173b1" strokeWidth="2" /><circle cx="10" cy="10" r="1.5" fill="#0173b1" /></svg>
-                        </button>
-                    </div>
-                </header>
-                <div className={style.messagesArea}>
-                    {messages.map(msg => (
-                        <div
-                            key={msg.id}
-                            className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
-                        >
-                            <span>{msg.text}</span>
-                        </div>
-                    ))}
-                </div>
-                <form className={style.inputArea} onSubmit={e => { e.preventDefault(); setInput(''); }}>
-                    <button type="button" className={style.inputIconBtn} title="Attach">
-                        <svg width="20" height="20" fill="none"><rect x="5" y="9" width="10" height="6" rx="3" stroke="#888" strokeWidth="2" /><path d="M10 9V5" stroke="#888" strokeWidth="2" strokeLinecap="round" /></svg>
-                    </button>
-                    <input
-                        type="text"
-                        className={style.inputBox}
-                        placeholder="Type a message"
-                        value={input}
-                        onChange={e => setInput(e.target.value)}
-                    />
-                    <button type="submit" className={style.sendBtn} title="Send">
-                        <svg width="20" height="20" fill="none"><path d="M3 17l14-7-14-7v6l10 1-10 1v6z" fill="#0173b1" /></svg>
-                    </button>
-                </form>
-            </main>
+            <ChatListPanel
+                style={style}
+                chatList={chatList}
+                selectedChat={selectedChat}
+                setSelectedChat={setSelectedChat}
+            />
+            <ChatMain
+                style={style}
+                selectedChat={selectedChat}
+                input={input}
+                setInput={setInput}
+                messages={messages}
+            />
         </div>
     )
 }
