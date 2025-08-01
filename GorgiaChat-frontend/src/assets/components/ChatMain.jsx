@@ -1,8 +1,8 @@
 import React from 'react'
 import { FiVideo } from 'react-icons/fi'
-import { MdNotifications, MdCalendarToday, MdChatBubble } from 'react-icons/md'
+import { MdCalendarToday, MdChatBubble, MdPhone } from 'react-icons/md'
 
-const ChatMain = ({ style, selectedChat, input, setInput, messages }) => (
+const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) => (
     <main className={style.chatMain}>
         <header className={style.chatHeader}>
             <div className={style.headerAvatar}>{selectedChat.name[0]}</div>
@@ -12,10 +12,10 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages }) => (
             </div>
             <div className={style.headerActions}>
                 <button className={style.headerBtn} title="Call">
-                    <FiVideo size={24} color="#0173b1" />
+                    <FiVideo size={20} color="#888" />
                 </button>
-                <button className={style.headerBtn} title="More">
-                    <MdNotifications size={24} color="#0173b1" />
+                <button className={style.headerBtn} title="Phone">
+                    <MdPhone size={20} color="#888" />
                 </button>
             </div>
         </header>
@@ -29,7 +29,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages }) => (
                 </div>
             ))}
         </div>
-        <form className={style.inputArea} onSubmit={e => { e.preventDefault(); setInput(''); }}>
+        <form className={style.inputArea} onSubmit={onSend}>
             <button type="button" className={style.inputIconBtn} title="Attach">
                 <MdCalendarToday size={20} color="#888" />
             </button>

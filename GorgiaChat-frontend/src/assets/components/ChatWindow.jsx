@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import style from '../css/ChatWindow.module.css'
 import { MdChatBubble, MdGroups, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
 import logo from '../../../public/logo.jpg'
 import ChatMain from './ChatMain'
 import ChatListPanel from './ChatListPanel'
+import { io } from 'socket.io-client'
 
 const sidebarIcons = [
     {
@@ -36,23 +37,41 @@ const chatList = [
     { id: 4, name: 'Support', lastMessage: 'How can we help?', active: false },
 ]
 
-const messages = [
-    { id: 1, fromMe: false, text: 'Hi there!' },
-    { id: 2, fromMe: true, text: 'Hello! How can I help you?' },
-    { id: 3, fromMe: false, text: 'I have a question about my order.' },
-    { id: 4, fromMe: true, text: 'Sure, please provide your order ID.' },
-]
-
 const ChatWindow = () => {
     const [input, setInput] = useState('')
     const [selectedChat, setSelectedChat] = useState(chatList[0])
     const [activeSidebar, setActiveSidebar] = useState(0)
+    const [messages, setMessages] = useState([])
+    const socketRef = useRef(null)
+
+    useEffect(() => {
+        socketRef.current = io('http://localhost:3000')
+        socketRef.current.on('receive-message', msg => {
+            setMessages(prev => [...prev, msg])
+        })
+        return () => {
+            socketRef.current.disconnect()
+        }
+    }, [])
+
+    const handleSend = e => {
+        e.preventDefault()
+        if (!input.trim()) return
+        const msg = {
+            id: Date.now(),
+            fromMe: true,
+            text: input
+        }
+        setMessages(prev => [...prev, msg])
+        socketRef.current.emit('send-message', { ...msg, fromMe: false })
+        setInput('')
+    }
 
     return (
         <div className={style.appBg}>
             <aside className={style.sidebar}>
                 <div style={{ marginBottom: 32 }}>
-                    <img src={logo} alt="Logo" style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4 }} />
+                    <img src={logo} onClick={() => window.location.reload()} alt="Logo" style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4, cursor: 'pointer' }} />
                 </div>
                 <div className={style.sidebarIcons}>
                     {sidebarIcons.map((item, idx) => {
@@ -93,6 +112,7 @@ const ChatWindow = () => {
                 input={input}
                 setInput={setInput}
                 messages={messages}
+                onSend={handleSend}
             />
         </div>
     )
