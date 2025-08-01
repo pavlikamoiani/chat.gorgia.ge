@@ -72,15 +72,21 @@
     padding: 48px 0 0 0;
     align-items: center;
     background: #181818;
-    min-width: 0;
     height: 100vh;
+    width: 100%;
+}
+
+.meetContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
 }
 
 .meetHeader {
     width: 100%;
     max-width: 900px;
     margin-bottom: 24px;
-    padding-left: 32px;
 }
 
 .meetHeader h2 {
@@ -91,15 +97,20 @@
 
 .meetActions {
     display: flex;
-    gap: 18px;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 32px;
     width: 100%;
-    max-width: 900px;
-    padding-left: 32px;
+    gap: 20px;
 }
 
 .meetBtn {
-    background: #23234a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: #0173b1;
     color: #fff;
     border: none;
     border-radius: 12px;
@@ -108,17 +119,16 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s;
+    border: 0.1px solid #fff;
 }
 
 .meetBtn:hover {
-    background: #0173b1;
+    background: #005380;
 }
 
 .meetingLinks {
     width: 100%;
-    max-width: 900px;
     margin-bottom: 32px;
-    padding-left: 32px;
 }
 
 .meetingLinkCard {
@@ -144,15 +154,17 @@
 
 .meetingLinkDesc {
     font-size: 0.98rem;
-    color: #8ab4f8;
+}
+
+.meetingLinkDesc a {
+    text-decoration: none;
+    color: #0173b1;
 }
 
 .scheduledMeetings {
     width: 100%;
-    max-width: 900px;
     background: #181818;
     border-radius: 16px;
-    padding: 0 32px 32px 32px;
 }
 
 .scheduledHeader {
@@ -168,7 +180,7 @@
 
 .viewCalendar {
     font-size: 0.98rem;
-    color: #8ab4f8;
+    color: #0173b1;
     cursor: pointer;
 }
 

@@ -27,7 +27,6 @@
 .sidebarIcons {
     display: flex;
     flex-direction: column;
-    gap: 24px;
     width: 100%;
     align-items: center;
 }
@@ -346,6 +345,23 @@
 
 .sendBtn:hover {
     background: #005e91;
+}
+
+.hamburgerBtn {
+    gap: 0 !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    border-radius: 6px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #232323 !important;
+    margin-bottom: 4px;
+}
+
+.hamburgerBtn:hover {
+    background: #353535 !important;
 }
 
 @media (max-width: 900px) {
