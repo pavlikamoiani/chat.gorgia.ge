@@ -1,30 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import style from '../../css/ChatWindow.module.css'
-import { MdChatBubble, MdGroups, MdCalendarToday, MdNotifications } from 'react-icons/md'
-import { FiVideo } from 'react-icons/fi'
-import logo from '../../../../public/logo.jpg'
-import ChatMain from './ChatMain'
-import ChatListPanel from '../../ChatListPanel'
+import style from '../css/ChatWindow.module.css'
 import { io } from 'socket.io-client'
-
-const sidebarIcons = [
-    {
-        name: 'Chat',
-        icon: MdChatBubble,
-    },
-    {
-        name: 'Meet',
-        icon: FiVideo,
-    },
-    {
-        name: 'Calendar',
-        icon: MdCalendarToday,
-    },
-    {
-        name: 'Activity',
-        icon: MdNotifications,
-    },
-]
+import { useNavigate } from 'react-router-dom'
+import Sidebar, { sidebarIcons } from './Sidebar'
+import ChatMain from './pages/chat/ChatMain'
+import ChatListPanel from './ChatListPanel'
+import logo from '../../../public/logo.jpg'
 
 const initialChatList = [
     { id: 1, name: 'John Doe', lastMessage: '', lastMessageTime: '', active: true },
@@ -41,6 +22,7 @@ const ChatWindow = () => {
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
     const socketRef = useRef(null)
+    const navigate = useNavigate()
 
     const formatTime = date => {
         const d = new Date(date)
@@ -105,37 +87,17 @@ const ChatWindow = () => {
 
     return (
         <div className={style.appBg}>
-            <aside className={style.sidebar}>
-                <div style={{ marginBottom: 32 }}>
-                    <img src={logo} onClick={() => window.location.reload()} alt="Logo" style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4, cursor: 'pointer' }} />
-                </div>
-                <div className={style.sidebarIcons}>
-                    {sidebarIcons.map((item, idx) => {
-                        const IconComp = item.icon
-                        return (
-                            <button
-                                key={item.name}
-                                className={style.sidebarBtn}
-                                title={item.name}
-                                onClick={() => setActiveSidebar(idx)}
-                            >
-                                <span className={style.icon}>
-                                    <IconComp size={26} color={idx === activeSidebar ? '#0173b1' : '#fff'} />
-                                </span>
-                                <span
-                                    className={style.sidebarLabel}
-                                    style={{
-                                        color: idx === activeSidebar ? '#0173b1' : '#fff',
-                                        fontWeight: idx === activeSidebar ? 600 : 400
-                                    }}
-                                >
-                                    {item.name}
-                                </span>
-                            </button>
-                        )
-                    })}
-                </div>
-            </aside>
+            <Sidebar
+                active={activeSidebar}
+                setActive={idx => {
+                    setActiveSidebar(idx)
+                    const item = sidebarIcons[idx]
+                    if (item.route && item.route !== '#') navigate(item.route)
+                }}
+                sidebarIcons={sidebarIcons}
+                logo={logo}
+                onLogoClick={() => window.location.reload()}
+            />
             <ChatListPanel
                 style={style}
                 chatList={chatList}
