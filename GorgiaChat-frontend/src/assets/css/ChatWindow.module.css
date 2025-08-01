@@ -102,7 +102,7 @@
 }
 
 .newMsgBtn:hover {
-    background: #0173b1;
+    color: #fff;
 }
 
 .searchBar {
@@ -111,7 +111,7 @@
     background: #181818;
     margin: 0 16px 12px 16px;
     border-radius: 8px;
-    padding: 6px 10px;
+    padding: 10px 10px;
     gap: 8px;
 }
 
@@ -121,7 +121,6 @@
     outline: none;
     color: #fff;
     font-size: 1rem;
-    width: 100%;
 }
 
 .chatList {
@@ -143,7 +142,7 @@
 
 .chatListItem:hover,
 .activeChat {
-    background: #0173b1;
+    background: #3535358e;
 }
 
 .avatar {

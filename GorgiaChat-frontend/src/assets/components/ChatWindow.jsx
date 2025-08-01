@@ -88,7 +88,7 @@ const ChatWindow = () => {
                 </div>
                 <div className={style.chatList}>
                     {chatList.map(chat => (
-                        <div
+                        <div style={{ cursor: 'pointer', marginBottom: '4px' }}
                             key={chat.id}
                             className={style.chatListItem + ' ' + (selectedChat.id === chat.id ? style.activeChat : '')}
                             onClick={() => setSelectedChat(chat)}
