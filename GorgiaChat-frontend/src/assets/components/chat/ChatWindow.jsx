@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
-import style from '../css/ChatWindow.module.css'
+import style from '../../css/ChatWindow.module.css'
 import { MdChatBubble, MdGroups, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
-import logo from '../../../public/logo.jpg'
+import logo from '../../../../public/logo.jpg'
 import ChatMain from './ChatMain'
 import ChatListPanel from './ChatListPanel'
 import { io } from 'socket.io-client'
@@ -17,10 +17,6 @@ const sidebarIcons = [
         icon: FiVideo,
     },
     {
-        name: 'Communities',
-        icon: MdGroups,
-    },
-    {
         name: 'Calendar',
         icon: MdCalendarToday,
     },
@@ -30,20 +26,26 @@ const sidebarIcons = [
     },
 ]
 
-const chatList = [
-    { id: 1, name: 'John Doe', lastMessage: 'See you at 3pm!', active: true },
-    { id: 2, name: 'Jane Smith', lastMessage: 'Thanks for the update.', active: false },
-    { id: 3, name: 'Team Alpha', lastMessage: 'Meeting starts soon.', active: false },
-    { id: 4, name: 'Support', lastMessage: 'How can we help?', active: false },
+const initialChatList = [
+    { id: 1, name: 'John Doe', lastMessage: '', lastMessageTime: '', active: true },
+    { id: 2, name: 'Jane Smith', lastMessage: '', lastMessageTime: '', active: false },
+    { id: 3, name: 'Team Alpha', lastMessage: '', lastMessageTime: '', active: false },
+    { id: 4, name: 'Support', lastMessage: '', lastMessageTime: '', active: false },
 ]
 
 const ChatWindow = () => {
     const [input, setInput] = useState('')
-    const [selectedChat, setSelectedChat] = useState(chatList[0])
+    const [chatList, setChatList] = useState(initialChatList)
+    const [selectedChat, setSelectedChat] = useState(initialChatList[0])
     const [activeSidebar, setActiveSidebar] = useState(0)
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
     const socketRef = useRef(null)
+
+    const formatTime = date => {
+        const d = new Date(date)
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
 
     useEffect(() => {
         socketRef.current = io('http://localhost:3000')
@@ -58,22 +60,47 @@ const ChatWindow = () => {
                     fromMe: msg.senderId === socketRef.current.id
                 }
             ])
+            setChatList(prev =>
+                prev.map(chat =>
+                    chat.id === selectedChat.id
+                        ? {
+                            ...chat,
+                            lastMessage: msg.text,
+                            lastMessageTime: formatTime(msg.time || Date.now())
+                        }
+                        : chat
+                )
+            )
         })
         return () => {
             socketRef.current.disconnect()
         }
-    }, [])
+        // eslint-disable-next-line
+    }, [selectedChat.id])
 
     const handleSend = e => {
         e.preventDefault()
         if (!input.trim() || !myId) return
+        const now = Date.now()
         const msg = {
-            id: Date.now(),
+            id: now,
             text: input,
-            senderId: myId
+            senderId: myId,
+            time: now
         }
         socketRef.current.emit('send-message', msg)
         setInput('')
+        setChatList(prev =>
+            prev.map(chat =>
+                chat.id === selectedChat.id
+                    ? {
+                        ...chat,
+                        lastMessage: msg.text,
+                        lastMessageTime: formatTime(now)
+                    }
+                    : chat
+            )
+        )
     }
 
     return (

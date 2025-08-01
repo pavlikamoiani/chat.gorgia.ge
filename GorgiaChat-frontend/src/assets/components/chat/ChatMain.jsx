@@ -1,6 +1,7 @@
 import React from 'react'
 import { FiVideo } from 'react-icons/fi'
-import { MdCalendarToday, MdChatBubble, MdPhone } from 'react-icons/md'
+import { MdCalendarToday, MdPhone } from 'react-icons/md'
+import { FiSend } from 'react-icons/fi'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) => (
     <main className={style.chatMain}>
@@ -41,7 +42,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                 onChange={e => setInput(e.target.value)}
             />
             <button type="submit" className={style.sendBtn} title="Send">
-                <MdChatBubble size={20} color="#fff" />
+                <FiSend size={20} color="#fff" />
             </button>
         </form>
     </main>

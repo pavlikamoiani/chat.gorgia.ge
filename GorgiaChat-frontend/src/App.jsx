@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ChatWindow from './assets/components/ChatWindow';
+import ChatWindow from './assets/components/chat/ChatWindow';
 import './App.css';
 
 function App() {

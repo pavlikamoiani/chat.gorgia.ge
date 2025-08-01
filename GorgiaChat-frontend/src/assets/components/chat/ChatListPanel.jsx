@@ -24,7 +24,14 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat }) => (
                     <div className={style.avatar}>{chat.name[0]}</div>
                     <div className={style.chatInfo}>
                         <span className={style.chatName}>{chat.name}</span>
-                        <span className={style.lastMsg}>{chat.lastMessage}</span>
+                        <span className={style.lastMsg}>
+                            {chat.lastMessage}
+                            {chat.lastMessageTime && (
+                                <span style={{ color: '#888', fontSize: '0.85em', marginLeft: 8 }}>
+                                    {chat.lastMessageTime}
+                                </span>
+                            )}
+                        </span>
                     </div>
                 </div>
             ))}
