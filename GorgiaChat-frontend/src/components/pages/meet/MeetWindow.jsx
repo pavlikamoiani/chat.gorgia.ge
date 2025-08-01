@@ -1,6 +1,6 @@
 import React from 'react'
-import style from '../../../css/MeetWindow.module.css'
-import logo from '../../../../../public/logo.jpg'
+import style from '../../../assets/css/MeetWindow.module.css'
+import logo from '../../../../public/logo.jpg'
 import { useNavigate } from 'react-router-dom'
 import Sidebar, { sidebarIcons } from '../../Sidebar'
 import { FiLink } from 'react-icons/fi'

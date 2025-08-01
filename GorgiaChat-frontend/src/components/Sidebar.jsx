@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import style from '../css/ChatWindow.module.css'
+import style from '../assets/css/ChatWindow.module.css'
 import { MdChatBubble, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
 import { GiHamburgerMenu } from 'react-icons/gi'

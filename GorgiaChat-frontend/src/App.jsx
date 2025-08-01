@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ChatWindow from './assets/components/ChatWindow';
-import MeetWindow from './assets/components/pages/meet/MeetWindow';
+import ChatWindow from './components/ChatWindow';
+import MeetWindow from './components/pages/meet/MeetWindow';
 import './App.css';
 
 function App() {

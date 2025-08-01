@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import style from '../css/ChatWindow.module.css'
+import style from '../assets/css/ChatWindow.module.css'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import Sidebar, { sidebarIcons } from './Sidebar'
 import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
-import logo from '../../../public/logo.jpg'
+import logo from '../../public/logo.jpg'
 
 const initialChatList = [
     { id: 1, name: 'John Doe', lastMessage: '', lastMessageTime: '', active: true },
