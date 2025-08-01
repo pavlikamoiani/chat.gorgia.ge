@@ -42,12 +42,22 @@ const ChatWindow = () => {
     const [selectedChat, setSelectedChat] = useState(chatList[0])
     const [activeSidebar, setActiveSidebar] = useState(0)
     const [messages, setMessages] = useState([])
+    const [myId, setMyId] = useState(null)
     const socketRef = useRef(null)
 
     useEffect(() => {
         socketRef.current = io('http://localhost:3000')
+        socketRef.current.on('connect', () => {
+            setMyId(socketRef.current.id)
+        })
         socketRef.current.on('receive-message', msg => {
-            setMessages(prev => [...prev, msg])
+            setMessages(prev => [
+                ...prev,
+                {
+                    ...msg,
+                    fromMe: msg.senderId === socketRef.current.id
+                }
+            ])
         })
         return () => {
             socketRef.current.disconnect()
@@ -56,14 +66,13 @@ const ChatWindow = () => {
 
     const handleSend = e => {
         e.preventDefault()
-        if (!input.trim()) return
+        if (!input.trim() || !myId) return
         const msg = {
             id: Date.now(),
-            fromMe: true,
-            text: input
+            text: input,
+            senderId: myId
         }
-        setMessages(prev => [...prev, msg])
-        socketRef.current.emit('send-message', { ...msg, fromMe: false })
+        socketRef.current.emit('send-message', msg)
         setInput('')
     }
 
