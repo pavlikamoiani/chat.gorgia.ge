@@ -1,12 +1,22 @@
 import React, { useState } from "react";
 import styles from "../../../assets/css/Login.module.css";
 import logo from "../../../assets/images/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuth } from "../../../store/authSlice";
+import { Navigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
+
+  // Если токен уже есть, сразу редирект на /chat
+  if (token) {
+    return <Navigate to="/chat" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,12 +41,13 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      if (!data.token) {
+        setError("Ошибка авторизации: токен не получен");
+        setLoading(false);
+        return;
+      }
 
-      setTimeout(() => {
-        window.location.href = "/chat";
-      }, 1000);
+      dispatch(setAuth({ user: data.user, token: data.token }));
     } catch (err) {
       setError(err.message);
     } finally {

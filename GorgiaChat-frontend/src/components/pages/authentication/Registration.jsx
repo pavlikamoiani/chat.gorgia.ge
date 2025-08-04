@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import styles from "../../../assets/css/Login.module.css";
 import logo from "../../../assets/images/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuth } from "../../../store/authSlice";
+import { Navigate } from "react-router-dom";
 
 const formatGeorgianNumber = (value) => {
     let digits = value.replace(/\D/g, "");
@@ -20,6 +23,13 @@ const Registration = () => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const dispatch = useDispatch();
+    const token = useSelector(state => state.auth.token);
+
+    // Если токен уже есть, сразу редирект на /chat
+    if (token) {
+        return <Navigate to="/chat" replace />;
+    }
 
     const handleNumberChange = (e) => {
         setNumber(formatGeorgianNumber(e.target.value));
@@ -54,12 +64,8 @@ const Registration = () => {
                 throw new Error(data.error || "Registration failed");
             }
 
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-
-            setTimeout(() => {
-                window.location.href = "/login";
-            }, 1500);
+            // Save to Redux
+            dispatch(setAuth({ user: data.user, token: data.token }));
 
         } catch (err) {
             setError(err.message);

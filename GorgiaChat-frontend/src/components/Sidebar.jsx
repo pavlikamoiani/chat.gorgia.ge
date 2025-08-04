@@ -4,6 +4,8 @@ import style from '../assets/css/ChatWindow.module.css'
 import { MdChatBubble, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
 import { GiHamburgerMenu } from 'react-icons/gi'
+import { useDispatch } from "react-redux";
+import { logout as logoutAction } from "../store/authSlice";
 
 export const sidebarIcons = [
     { name: 'Chat', icon: MdChatBubble, route: '/chat' },
@@ -15,6 +17,7 @@ export const sidebarIcons = [
 const Sidebar = ({ active, setActive, onLogoClick, onProfile, onLogout }) => {
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef(null)
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -119,6 +122,8 @@ const Sidebar = ({ active, setActive, onLogoClick, onProfile, onLogout }) => {
                             }}
                             onClick={() => {
                                 setMenuOpen(false)
+                                dispatch(logoutAction())
+                                window.location.href = '/login'
                                 onLogout && onLogout()
                             }}
                         >
