@@ -12,9 +12,6 @@ import defaultInstance from '../api/defaultInstance'
 const ChatWindow = () => {
     const user = useSelector(state => state.auth.user)
 
-    const username = user?.username || ''
-    const displayName = username.charAt(0).toUpperCase() + username.slice(1)
-
     const [input, setInput] = useState('')
     const [chatList, setChatList] = useState([])
     const [selectedChat, setSelectedChat] = useState(null)
@@ -37,9 +34,9 @@ const ChatWindow = () => {
                 const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
                 if (response.data.contacts) {
                     setChatList(response.data.contacts);
-                    if (response.data.contacts.length > 0) {
-                        setSelectedChat(response.data.contacts[0]);
-                    }
+                    // if (response.data.contacts.length > 0) {
+                    //     setSelectedChat(response.data.contacts[0]);
+                    // }
                 }
             } catch (error) {
                 console.error("Failed to fetch chat contacts:", error);
@@ -71,16 +68,15 @@ const ChatWindow = () => {
 
                 setChatList(prev => {
                     const existingChatIndex = prev.findIndex(chat => chat.id === otherUserId);
-                    const formattedTime = formatTime(msg.time || Date.now());
-
+                    const isChatOpen = selectedChat && selectedChat.id === otherUserId;
                     if (existingChatIndex >= 0) {
                         const updatedChats = [...prev];
                         updatedChats[existingChatIndex] = {
                             ...updatedChats[existingChatIndex],
                             lastMessage: msg.text,
-                            lastMessageTime: msg.time || Date.now()
+                            lastMessageTime: msg.time || Date.now(),
+                            unread: !isChatOpen && msg.senderDbId !== user?.id // mark unread if not open and not from me
                         };
-
                         return updatedChats.sort((a, b) =>
                             (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
                     }
@@ -89,7 +85,11 @@ const ChatWindow = () => {
                         defaultInstance.get(`/user/chat-contacts/${user.id}`)
                             .then(response => {
                                 if (response.data.contacts) {
-                                    setChatList(response.data.contacts);
+                                    // Add unread property for new chats
+                                    setChatList(response.data.contacts.map(chat => ({
+                                        ...chat,
+                                        unread: !selectedChat || selectedChat.id !== chat.id
+                                    })));
                                 }
                             })
                             .catch(error => console.error("Failed to refresh chat contacts:", error));
@@ -102,7 +102,7 @@ const ChatWindow = () => {
         return () => {
             socketRef.current.disconnect()
         }
-    }, [user?.id]);
+    }, [user?.id, selectedChat?.id]);
 
     useEffect(() => {
         window.clearMessagesForNewChat = () => setMessages([])
@@ -161,11 +161,15 @@ const ChatWindow = () => {
         setInput('')
     }
 
-    useEffect(() => {
-        if (!selectedChat && chatList.length > 0) {
-            setSelectedChat(chatList[0]);
-        }
-    }, [chatList, selectedChat]);
+    // Mark chat as read when selected
+    const handleSelectChat = chat => {
+        setSelectedChat(chat)
+        setChatList(prev =>
+            prev.map(c =>
+                c.id === chat.id ? { ...c, unread: false } : c
+            )
+        )
+    }
 
     return (
         <div className={style.appBg}>
@@ -184,7 +188,7 @@ const ChatWindow = () => {
                 style={style}
                 chatList={chatList}
                 selectedChat={selectedChat || {}}
-                setSelectedChat={setSelectedChat}
+                setSelectedChat={handleSelectChat}
                 setChatList={setChatList}
             />
             {selectedChat ? (
@@ -198,9 +202,8 @@ const ChatWindow = () => {
                 />
             ) : (
                 <div className={style.chatMain} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ textAlign: 'center', color: '#888' }}>
-                        <h3>No conversations yet</h3>
-                        <p style={{ marginTop: '10px' }}>Search for users to start chatting</p>
+                    <div style={{ textAlign: 'center', color: '#888', fontSize: '1.3rem' }}>
+                        აირჩიერთ ჩათი.
                     </div>
                 </div>
             )}

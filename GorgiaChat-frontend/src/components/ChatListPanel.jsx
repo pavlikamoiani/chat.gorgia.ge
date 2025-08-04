@@ -132,7 +132,9 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                             <div className={style.chatInfo}>
                                 <span className={style.chatName}>{chat.name}</span>
                                 <span className={style.lastMsg}>
-                                    {chat.lastMessage}
+                                    <span style={chat.unread ? { fontWeight: 'bold', color: '#fff' } : {}}>
+                                        {chat.lastMessage}
+                                    </span>
                                     {chat.lastMessageTime && (
                                         <span style={{ color: '#888', fontSize: '0.85em', marginLeft: 8 }}>
                                             {formatTimestamp(chat.lastMessageTime)}
