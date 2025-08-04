@@ -12,10 +12,10 @@ export default function Login() {
           <div className={styles.inputGroup}>
             <span className={styles.inputIcon}></span>
             <input
-              type="text"
-              placeholder="Username"
+              type="email"
+              placeholder="Email"
               className={styles.input}
-              autoComplete="username"
+              autoComplete="email"
             />
           </div>
           <div className={styles.inputGroup}>

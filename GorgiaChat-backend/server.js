@@ -2,72 +2,22 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
+
+dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+
 app.use(cors());
 app.use(express.json());
 
 const pool = require('./config/db');
 
-app.post('/api/register', async (req, res) => {
-    try {
-        const { username, number, email, password } = req.body;
+const registerRoute = require('./routes/register');
+app.use('/api/register', registerRoute);
 
-        if (!username || !number || !email || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
-        }
-
-        const [existingUsers] = await pool.query(
-            'SELECT * FROM users WHERE username = ? OR email = ? OR phone_number = ?',
-            [username, email, number]
-        );
-
-        if (existingUsers.length > 0) {
-            if (existingUsers.find(user => user.username === username)) {
-                return res.status(409).json({ error: 'Username already exists' });
-            }
-            if (existingUsers.find(user => user.email === email)) {
-                return res.status(409).json({ error: 'Email already exists' });
-            }
-            if (existingUsers.find(user => user.phone_number === number)) {
-                return res.status(409).json({ error: 'Phone number already exists' });
-            }
-        }
-
-        const bcrypt = require('bcrypt');
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        const [result] = await pool.query(
-            'INSERT INTO users (username, phone_number, email, password) VALUES (?, ?, ?, ?)',
-            [username, number, email, hashedPassword]
-        );
-
-        const jwt = require('jsonwebtoken');
-        const token = jwt.sign(
-            { id: result.insertId, username, email },
-            process.env.JWT_SECRET || 'fallback_secret_key',
-            { expiresIn: '24h' }
-        );
-
-        res.status(201).json({
-            message: 'User registered successfully',
-            token,
-            user: {
-                id: result.insertId,
-                username,
-                email
-            }
-        });
-
-    } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ error: 'Server error during registration' });
-    }
-});
-
-const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
@@ -76,19 +26,19 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-    console.log('New user connected:', socket.id);
+    console.log('✅ New user connected:', socket.id);
 
     socket.on('send-message', (message) => {
-        console.log('Message received:', message);
+        console.log('📨 Message received:', message);
         io.emit('receive-message', message);
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+        console.log('❌ User disconnected:', socket.id);
     });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
