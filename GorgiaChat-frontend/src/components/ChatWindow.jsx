@@ -6,12 +6,24 @@ import Sidebar, { sidebarIcons } from './Sidebar'
 import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
 import logo from '/logo.jpg'
-
-const initialChatList = [
-    { id: 1, name: 'John Doe', lastMessage: '', lastMessageTime: '', active: true },
-]
+import { useSelector } from 'react-redux'
 
 const ChatWindow = () => {
+    const user = useSelector(state => state.auth.user)
+
+    const username = user?.username || ''
+    const displayName = username.charAt(0).toUpperCase() + username.slice(1)
+
+    const initialChatList = [
+        {
+            id: 1,
+            name: displayName,
+            lastMessage: '',
+            lastMessageTime: '',
+            active: true
+        },
+    ]
+
     const [input, setInput] = useState('')
     const [chatList, setChatList] = useState(initialChatList)
     const [selectedChat, setSelectedChat] = useState(initialChatList[0])

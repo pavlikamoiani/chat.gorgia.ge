@@ -6,7 +6,9 @@ import { FiSend } from 'react-icons/fi'
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) => (
     <main className={style.chatMain}>
         <header className={style.chatHeader}>
-            <div className={style.headerAvatar}>{selectedChat.name[0]}</div>
+            <div className={style.headerAvatar}>
+                {selectedChat.name ? selectedChat.name[0].toUpperCase() : ''}
+            </div>
             <div className={style.headerInfo}>
                 <div className={style.headerInfoNameActivity}>
                     <span className={style.headerName}>{selectedChat.name}</span>

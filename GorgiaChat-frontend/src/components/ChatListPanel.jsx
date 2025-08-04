@@ -21,7 +21,9 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat }) => (
                     className={style.chatListItem + ' ' + (selectedChat.id === chat.id ? style.activeChat : '')}
                     onClick={() => setSelectedChat(chat)}
                 >
-                    <div className={style.avatar}>{chat.name[0]}</div>
+                    <div className={style.avatar}>
+                        {chat.name ? chat.name[0].toUpperCase() : ''}
+                    </div>
                     <div className={style.chatInfo}>
                         <span className={style.chatName}>{chat.name}</span>
                         <span className={style.lastMsg}>
