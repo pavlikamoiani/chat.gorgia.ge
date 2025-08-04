@@ -1,0 +1,198 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.loginBg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f0fc 0%, #b3d8f7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative chat bubbles */
+.loginBg::before,
+.loginBg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.18;
+  z-index: 0;
+}
+
+.loginBg::before {
+  width: 320px;
+  height: 320px;
+  background: #1976d2;
+  left: -120px;
+  top: -80px;
+  filter: blur(8px);
+}
+
+.loginBg::after {
+  width: 220px;
+  height: 220px;
+  background: #2196f3;
+  right: -80px;
+  bottom: -60px;
+  filter: blur(6px);
+}
+
+.loginContainer {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 32px;
+  box-shadow: 0 12px 40px rgba(25, 118, 210, 0.18), 0 2px 8px rgba(25, 118, 210, 0.06);
+  padding: 48px 38px 38px 38px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+  transition: box-shadow 0.3s;
+}
+
+.loginContainer:hover {
+  box-shadow: 0 18px 60px rgba(25, 118, 210, 0.22), 0 4px 16px rgba(25, 118, 210, 0.10);
+}
+
+.logo {
+  width: 220px;
+  margin-bottom: 26px;
+  filter: drop-shadow(0 2px 8px #1976d233);
+  transition: transform 0.2s;
+}
+
+.logo:hover {
+  transform: scale(1.05) rotate(-3deg);
+}
+
+.title {
+  font-size: 1.6rem;
+  color: #1976d2;
+  margin-bottom: 28px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+  text-shadow: 0 2px 8px #b3d8f7aa;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background: #f4f8fb;
+  border-radius: 22px;
+  padding: 5px 18px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.06);
+  transition: box-shadow 0.2s, border 0.2s;
+  border: 1.5px solid transparent;
+  gap: 0;
+}
+
+.inputGroup:focus-within {
+  box-shadow: 0 4px 18px rgba(25, 118, 210, 0.13);
+  border: 1.5px solid #1976d2;
+  background: #e3f0fc;
+}
+
+.inputIcon {
+  font-size: 1.35rem;
+  margin-right: 10px;
+  color: #1976d2;
+  transition: color 0.2s;
+}
+
+.inputGroup:focus-within .inputIcon {
+  color: #1565c0;
+}
+
+.input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1.09rem;
+  width: 100%;
+  padding: 9px 0;
+  color: #222;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+  transition: color 0.2s;
+}
+
+.input:focus {
+  color: #1976d2;
+}
+
+.button {
+  margin-top: 12px;
+  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  padding: 13px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.13);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.button:hover,
+.button:focus {
+  background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.22);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.footerText {
+  margin-top: 28px;
+  font-size: 1.03rem;
+  color: #555;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s, text-decoration 0.2s;
+  border-bottom: 1px dashed #1976d2;
+  padding-bottom: 1px;
+}
+
+.link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+  border-bottom: none;
+}
+
+/* Optional: Number prefix styling
+.numberPrefix {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  background: #e3f0fc;
+  border-radius: 16px;
+  padding: 7px 14px;
+  font-weight: bold;
+  font-size: 1.08rem;
+  color: #1976d2;
+  box-shadow: 0 2px 8px #1976d211;
+}
+*/

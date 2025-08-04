@@ -1,0 +1,156 @@
+import React, { useState } from "react";
+import styles from "../../../assets/css/Login.module.css";
+import logo from "../../../assets/images/logo.png";
+
+const formatGeorgianNumber = (value) => {
+    let digits = value.replace(/\D/g, "");
+    digits = digits.slice(0, 9);
+    let formatted = "";
+    if (digits.length > 0) formatted += digits.slice(0, 3);
+    if (digits.length > 3) formatted += " " + digits.slice(3, 5);
+    if (digits.length > 5) formatted += " " + digits.slice(5, 7);
+    if (digits.length > 7) formatted += " " + digits.slice(7, 9);
+    return formatted;
+};
+
+const Registration = () => {
+    const [number, setNumber] = useState("");
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const handleNumberChange = (e) => {
+        setNumber(formatGeorgianNumber(e.target.value));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const response = await fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username,
+                    number: number.replace(/\s/g, ""),
+                    email,
+                    password
+                })
+            });
+            if (response.ok) {
+                alert("Registration successful!");
+            } else {
+                const error = await response.json();
+                alert(error.error || error.message || "Registration failed"); // use error.error
+            }
+        } catch (err) {
+            alert("Network error");
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className={styles.loginBg}>
+            <div className={styles.loginContainer}>
+                <img src={logo} alt="Gorgia Logo" className={styles.logo} />
+                {/* <h2 className={styles.title}>Create your account</h2> */}
+                <form className={styles.form} onSubmit={handleSubmit}>
+                    <div className={styles.inputGroup}>
+                        <span className={styles.inputIcon}></span>
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            className={styles.input}
+                            autoComplete="username"
+                            value={username}
+                            onChange={e => setUsername(e.target.value)}
+                        />
+                    </div>
+                    <div className={styles.inputGroup} style={{ gap: 0 }}>
+                        <span style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: 10,
+                            background: "#e3f0fc",
+                            borderRadius: "16px",
+                            padding: "7px",
+                            fontWeight: "bold",
+                            fontSize: "1.1rem",
+                            color: "#1976d2",
+                            boxShadow: "0 2px 8px #1976d211"
+                        }}>
+                            <span style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 28,
+                                height: 28,
+                                borderRadius: "50%",
+                                background: "#dbeafe",
+                                color: "#1976d2",
+                                fontWeight: 700,
+                                fontSize: 15,
+                                marginRight: 6,
+                                letterSpacing: "1px"
+                            }}>GE</span>
+                            <span style={{
+                                color: "#1976d2",
+                                fontWeight: 700,
+                                fontSize: "1.08rem"
+                            }}>+995</span>
+                        </span>
+                        <input
+                            type="text"
+                            placeholder="Number"
+                            className={styles.input}
+                            autoComplete="off"
+                            inputMode="numeric"
+                            pattern="[0-9 ]*"
+                            maxLength={12}
+                            value={number}
+                            onChange={handleNumberChange}
+                            style={{
+                                letterSpacing: "2px",
+                                fontWeight: 600,
+                                fontSize: "1.13rem",
+                                background: "transparent"
+                            }}
+                        />
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <span className={styles.inputIcon}></span>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            className={styles.input}
+                            autoComplete="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <span className={styles.inputIcon}></span>
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            className={styles.input}
+                            autoComplete="new-password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className={styles.button} disabled={loading}>
+                        {loading ? "Registering..." : "Register"}
+                    </button>
+                </form>
+                <div className={styles.footerText}>
+                    <span>Already have an account?</span>
+                    <a href="/login" className={styles.link}>Log In</a>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Registration;

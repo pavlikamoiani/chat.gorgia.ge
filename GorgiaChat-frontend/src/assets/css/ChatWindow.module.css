@@ -225,13 +225,31 @@
 
 .headerInfo {
     display: flex;
-    flex-direction: column;
     flex: 1;
+    gap: 20px;
+}
+
+.headerInfoNameActivity {
+    display: flex;
+    flex-direction: column;
+}
+
+.headerInfoChatFilesPhotos {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.headerInfoChatFilesPhotos a {
+    font-size: 0.91rem;
+    text-decoration: none;
+    color: #888;
 }
 
 .headerName {
-    font-weight: 600;
-    font-size: 1.1rem;
+    font-weight: bold;
+    font-size: 1.4rem;
     color: #fff;
 }
 
@@ -305,7 +323,7 @@
     background: none;
     border: none;
     outline: none;
-    padding: 0 6px;
+    padding: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;

@@ -5,13 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar, { sidebarIcons } from './Sidebar'
 import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
-import logo from '../../public/logo.jpg'
+import logo from '/logo.jpg'
 
 const initialChatList = [
     { id: 1, name: 'John Doe', lastMessage: '', lastMessageTime: '', active: true },
-    { id: 2, name: 'Jane Smith', lastMessage: '', lastMessageTime: '', active: false },
-    { id: 3, name: 'Team Alpha', lastMessage: '', lastMessageTime: '', active: false },
-    { id: 4, name: 'Support', lastMessage: '', lastMessageTime: '', active: false },
 ]
 
 const ChatWindow = () => {

@@ -1,6 +1,5 @@
 import React from 'react'
 import style from '../../../assets/css/MeetWindow.module.css'
-import logo from '../../../../public/logo.jpg'
 import { useNavigate } from 'react-router-dom'
 import Sidebar, { sidebarIcons } from '../../Sidebar'
 import { FiLink } from 'react-icons/fi'
@@ -18,8 +17,7 @@ const MeetWindow = () => {
                     if (item.route && item.route !== '#') navigate(item.route)
                 }}
                 sidebarIcons={sidebarIcons}
-                logo={logo}
-                onLogoClick={() => navigate('/')}
+                onLogoClick={() => window.location.reload()}
             />
             <main className={style.meetMain}>
                 <div className={style.meetContainer}>
@@ -52,7 +50,7 @@ const MeetWindow = () => {
                     <div className={style.scheduledMeetings}>
                         <div className={style.scheduledHeader}>
                             <span>Scheduled meetings</span>
-                            <span className={style.viewCalendar}>View in calendar</span>
+                            <span className={style.viewCalendar} onClick={() => navigate('/calendar')}>View in calendar</span>
                         </div>
                         <div className={style.scheduledEmpty}>
                             <div className={style.scheduledEmptyText}>You don't have anything scheduled.</div>

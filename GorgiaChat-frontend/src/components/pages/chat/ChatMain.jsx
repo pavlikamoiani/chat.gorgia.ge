@@ -8,9 +8,17 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
         <header className={style.chatHeader}>
             <div className={style.headerAvatar}>{selectedChat.name[0]}</div>
             <div className={style.headerInfo}>
-                <span className={style.headerName}>{selectedChat.name}</span>
-                <span className={style.headerStatus}>Online</span>
+                <div className={style.headerInfoNameActivity}>
+                    <span className={style.headerName}>{selectedChat.name}</span>
+                    {/* <span className={style.headerStatus}>Online</span> */}
+                </div>
+                <div className={style.headerInfoChatFilesPhotos}>
+                    <a href='#'>Chat</a>
+                    <a href='#'>Files</a>
+                    <a href='#'>Photos</a>
+                </div>
             </div>
+
             <div className={style.headerActions}>
                 <button className={style.headerBtn} title="Call">
                     <FiVideo size={20} color="#888" />

@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react'
+import logo from '/logo.jpg'
 import style from '../assets/css/ChatWindow.module.css'
 import { MdChatBubble, MdCalendarToday, MdNotifications } from 'react-icons/md'
 import { FiVideo } from 'react-icons/fi'
 import { GiHamburgerMenu } from 'react-icons/gi'
 
 export const sidebarIcons = [
-    { name: 'Chat', icon: MdChatBubble, route: '/' },
+    { name: 'Chat', icon: MdChatBubble, route: '/chat' },
     { name: 'Meet', icon: FiVideo, route: '/meet' },
     { name: 'Calendar', icon: MdCalendarToday, route: '/calendar' },
     { name: 'Activity', icon: MdNotifications, route: '/activity' },
 ]
 
-const Sidebar = ({ active, setActive, logo, onLogoClick, onProfile, onLogout }) => {
+const Sidebar = ({ active, setActive, onLogoClick, onProfile, onLogout }) => {
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef(null)
 
@@ -34,14 +35,9 @@ const Sidebar = ({ active, setActive, logo, onLogoClick, onProfile, onLogout }) 
     return (
         <aside className={style.sidebar}>
             <div style={{ marginBottom: 32 }}>
-                {logo && (
-                    <img
-                        src={logo}
-                        alt="Logo"
-                        style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4, cursor: 'pointer' }}
-                        onClick={onLogoClick}
-                    />
-                )}
+                <img src={logo} alt="Logo"
+                    style={{ width: 40, height: 40, borderRadius: 8, marginTop: 4, cursor: 'pointer' }}
+                    onClick={onLogoClick} />
             </div>
             <div className={style.sidebarIcons}>
                 {sidebarIcons.map((item, idx) => {
