@@ -4,6 +4,7 @@ import logo from "../../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../../../store/authSlice";
 import { Navigate } from "react-router-dom";
+import defaultInstance from "../../../api/defaultInstance";
 
 const formatGeorgianNumber = (value) => {
     let digits = value.replace(/\D/g, "");
@@ -26,7 +27,6 @@ const Registration = () => {
     const dispatch = useDispatch();
     const token = useSelector(state => state.auth.token);
 
-    // Если токен уже есть, сразу редирект на /chat
     if (token) {
         return <Navigate to="/chat" replace />;
     }
@@ -47,28 +47,26 @@ const Registration = () => {
         }
 
         try {
-            const response = await fetch("http://localhost:3000/api/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    username,
-                    number: number.replace(/\s/g, ""),
-                    email,
-                    password
-                })
+            const response = await defaultInstance.post("/register", {
+                username,
+                number: number.replace(/\s/g, ""),
+                email,
+                password
             });
+            const data = response.data;
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!data.token) {
                 throw new Error(data.error || "Registration failed");
             }
 
-            // Save to Redux
             dispatch(setAuth({ user: data.user, token: data.token }));
 
         } catch (err) {
-            setError(err.message);
+            setError(
+                err.response?.data?.error ||
+                err.message ||
+                "Registration failed"
+            );
         } finally {
             setLoading(false);
         }

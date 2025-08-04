@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 
         res.json({
             message: 'Login successful',
-            token, // <-- здесь должен быть токен
+            token,
             user: {
                 id: user.id,
                 username: user.username,

@@ -4,6 +4,7 @@ import logo from "../../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../../../store/authSlice";
 import { Navigate } from "react-router-dom";
+import defaultInstance from "../../../api/defaultInstance";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,6 @@ export default function Login() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
 
-  // Если токен уже есть, сразу редирект на /chat
   if (token) {
     return <Navigate to="/chat" replace />;
   }
@@ -30,26 +30,22 @@ export default function Login() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
-      }
+      const response = await defaultInstance.post("/login", { email, password });
+      const data = response.data;
 
       if (!data.token) {
-        setError("Ошибка авторизации: токен не получен");
+        setError("Login failed: " + (data.error || "Invalid credentials"));
         setLoading(false);
         return;
       }
 
       dispatch(setAuth({ user: data.user, token: data.token }));
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.error ||
+        err.message ||
+        "Login failed"
+      );
     } finally {
       setLoading(false);
     }
