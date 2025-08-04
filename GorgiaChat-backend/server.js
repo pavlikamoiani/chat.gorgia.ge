@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// Middleware
 app.use(cors({
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
@@ -17,15 +18,22 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Database
 const pool = require('./config/db');
 
+// Routes
 const registerRoute = require('./routes/register');
 const loginRoute = require('./routes/login');
+const userRoutes = require('./routes/userRoutes');
+
 app.use('/api/register', registerRoute);
 app.use('/api/login', loginRoute);
+app.use('/api/user', userRoutes);
+
 app.use('/api', (req, res) => {
     res.status(404).json({ error: 'API route not found' });
 });
+
 
 const io = new Server(server, {
     cors: {
@@ -37,7 +45,7 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log('New user connected:', socket.id);
 
-    socket.on('send-message', (message) => {
+    socket.on('send-message', async (message) => {
         console.log('Message received:', message);
         io.emit('receive-message', message);
     });
@@ -47,6 +55,7 @@ io.on('connection', (socket) => {
     });
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

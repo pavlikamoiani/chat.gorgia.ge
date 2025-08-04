@@ -31,14 +31,20 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
             </div>
         </header>
         <div className={style.messagesArea}>
-            {messages.map(msg => (
-                <div
-                    key={msg.id}
-                    className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
-                >
-                    <span>{msg.text}</span>
+            {messages.length === 0 ? (
+                <div style={{ color: '#888', textAlign: 'center', marginTop: '20px' }}>
+                    No messages yet. Start the conversation!
                 </div>
-            ))}
+            ) : (
+                messages.map(msg => (
+                    <div
+                        key={msg.id}
+                        className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
+                    >
+                        <span>{msg.text}</span>
+                    </div>
+                ))
+            )}
         </div>
         <form className={style.inputArea} onSubmit={onSend}>
             <button type="button" className={style.inputIconBtn} title="Attach">

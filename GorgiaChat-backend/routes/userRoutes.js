@@ -59,4 +59,93 @@ router.post('/register', async (req, res) => {
     }
 });
 
+router.get('/search-user', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.trim().length === 0) {
+        return res.status(400).json({ error: 'Query is required' });
+    }
+    try {
+        const [users] = await pool.query(
+            'SELECT id, username, email FROM users WHERE username LIKE ? OR email LIKE ? LIMIT 10',
+            [`%${q}%`, `%${q}%`]
+        );
+        res.json({ users });
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ error: 'Server error during search' });
+    }
+});
+
+router.post('/messages/send', async (req, res) => {
+    const { senderId, receiverId, text, time } = req.body;
+    if (!senderId || !receiverId || !text || !time) {
+        return res.status(400).json({ error: 'Missing fields' });
+    }
+    try {
+        await pool.query(
+            'INSERT INTO messages (sender_id, receiver_id, text, time) VALUES (?, ?, ?, ?)',
+            [senderId, receiverId, text, time]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Send message error:', error);
+        res.status(500).json({ error: 'Server error during message send' });
+    }
+});
+
+router.get('/messages/:userId/:otherUserId', async (req, res) => {
+    const { userId, otherUserId } = req.params;
+    try {
+        const [messages] = await pool.query(
+            `SELECT * FROM messages
+             WHERE (sender_id = ? AND receiver_id = ?)
+                OR (sender_id = ? AND receiver_id = ?)
+             ORDER BY time ASC`,
+            [userId, otherUserId, otherUserId, userId]
+        );
+        res.json({ messages });
+    } catch (error) {
+        console.error('Fetch messages error:', error);
+        res.status(500).json({ error: 'Server error during fetch messages' });
+    }
+});
+
+router.get('/chat-contacts/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [contacts] = await pool.query(
+            `SELECT DISTINCT u.id, u.username, u.email, 
+                (SELECT m.text FROM messages m 
+                 WHERE ((m.sender_id = ? AND m.receiver_id = u.id) OR 
+                        (m.sender_id = u.id AND m.receiver_id = ?)) 
+                 ORDER BY m.time DESC LIMIT 1) as last_message,
+                (SELECT m.time FROM messages m 
+                 WHERE ((m.sender_id = ? AND m.receiver_id = u.id) OR 
+                        (m.sender_id = u.id AND m.receiver_id = ?)) 
+                 ORDER BY m.time DESC LIMIT 1) as last_message_time
+             FROM users u
+             INNER JOIN messages m 
+             ON (m.sender_id = ? AND m.receiver_id = u.id) OR 
+                (m.sender_id = u.id AND m.receiver_id = ?)
+             WHERE u.id <> ?
+             ORDER BY last_message_time DESC`,
+            [userId, userId, userId, userId, userId, userId, userId]
+        );
+
+        res.json({
+            contacts: contacts.map(contact => ({
+                id: contact.id,
+                name: contact.username,
+                email: contact.email,
+                lastMessage: contact.last_message,
+                lastMessageTime: contact.last_message_time
+            }))
+        });
+    } catch (error) {
+        console.error('Fetch chat contacts error:', error);
+        res.status(500).json({ error: 'Server error while fetching chat contacts' });
+    }
+});
+
 module.exports = router;

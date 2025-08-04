@@ -7,6 +7,7 @@ import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
 import logo from '/logo.jpg'
 import { useSelector } from 'react-redux'
+import defaultInstance from '../api/defaultInstance'
 
 const ChatWindow = () => {
     const user = useSelector(state => state.auth.user)
@@ -14,19 +15,9 @@ const ChatWindow = () => {
     const username = user?.username || ''
     const displayName = username.charAt(0).toUpperCase() + username.slice(1)
 
-    const initialChatList = [
-        {
-            id: 1,
-            name: displayName,
-            lastMessage: '',
-            lastMessageTime: '',
-            active: true
-        },
-    ]
-
     const [input, setInput] = useState('')
-    const [chatList, setChatList] = useState(initialChatList)
-    const [selectedChat, setSelectedChat] = useState(initialChatList[0])
+    const [chatList, setChatList] = useState([])
+    const [selectedChat, setSelectedChat] = useState(null)
     const [activeSidebar, setActiveSidebar] = useState(0)
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
@@ -39,60 +30,142 @@ const ChatWindow = () => {
     }
 
     useEffect(() => {
+        const fetchChatContacts = async () => {
+            if (!user?.id) return;
+
+            try {
+                const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
+                if (response.data.contacts) {
+                    setChatList(response.data.contacts);
+                    if (response.data.contacts.length > 0) {
+                        setSelectedChat(response.data.contacts[0]);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch chat contacts:", error);
+            }
+        };
+
+        fetchChatContacts();
+    }, [user?.id]);
+
+    useEffect(() => {
         socketRef.current = io('http://localhost:3000')
         socketRef.current.on('connect', () => {
             setMyId(socketRef.current.id)
         })
         socketRef.current.on('receive-message', msg => {
-            setMessages(prev => [
-                ...prev,
-                {
-                    ...msg,
-                    fromMe: msg.senderId === socketRef.current.id
-                }
-            ])
-            setChatList(prev =>
-                prev.map(chat =>
-                    chat.id === selectedChat.id
-                        ? {
-                            ...chat,
+            setMessages(prev => {
+                if (prev.some(m => m.id === msg.id)) return prev
+                return [
+                    ...prev,
+                    {
+                        ...msg,
+                        fromMe: msg.senderDbId === user?.id
+                    }
+                ]
+            })
+
+            if (msg.senderDbId === user?.id || msg.receiverDbId === user?.id) {
+                const otherUserId = msg.senderDbId === user?.id ? msg.receiverDbId : msg.senderDbId;
+
+                setChatList(prev => {
+                    const existingChatIndex = prev.findIndex(chat => chat.id === otherUserId);
+                    const formattedTime = formatTime(msg.time || Date.now());
+
+                    if (existingChatIndex >= 0) {
+                        const updatedChats = [...prev];
+                        updatedChats[existingChatIndex] = {
+                            ...updatedChats[existingChatIndex],
                             lastMessage: msg.text,
-                            lastMessageTime: formatTime(msg.time || Date.now())
-                        }
-                        : chat
-                )
-            )
+                            lastMessageTime: msg.time || Date.now()
+                        };
+
+                        return updatedChats.sort((a, b) =>
+                            (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
+                    }
+
+                    if (msg.senderDbId !== user?.id) {
+                        defaultInstance.get(`/user/chat-contacts/${user.id}`)
+                            .then(response => {
+                                if (response.data.contacts) {
+                                    setChatList(response.data.contacts);
+                                }
+                            })
+                            .catch(error => console.error("Failed to refresh chat contacts:", error));
+                    }
+
+                    return prev;
+                });
+            }
         })
         return () => {
             socketRef.current.disconnect()
         }
-        // eslint-disable-next-line
-    }, [selectedChat.id])
+    }, [user?.id]);
 
-    const handleSend = e => {
+    useEffect(() => {
+        window.clearMessagesForNewChat = () => setMessages([])
+        return () => { window.clearMessagesForNewChat = null }
+    }, [])
+
+    useEffect(() => {
+        if (!selectedChat || !user?.id || !selectedChat.id) return
+        const fetchMessages = async () => {
+            try {
+                const res = await defaultInstance.get(`/user/messages/${user.id}/${selectedChat.id}`)
+                const msgs = (res.data.messages || []).map(msg => ({
+                    id: msg.id,
+                    text: msg.text,
+                    senderId: msg.sender_id,
+                    time: msg.time,
+                    fromMe: msg.sender_id === user.id
+                }))
+                setMessages(msgs)
+            } catch (err) {
+                setMessages([])
+            }
+        }
+        fetchMessages()
+    }, [selectedChat?.id, user?.id])
+
+    const handleSend = async e => {
         e.preventDefault()
-        if (!input.trim() || !myId) return
+        if (!input.trim() || !myId || !user?.id || !selectedChat?.id) return
         const now = Date.now()
         const msg = {
             id: now,
             text: input,
             senderId: myId,
+            senderDbId: user.id,
+            receiverDbId: selectedChat.id,
             time: now
         }
+        try {
+            await defaultInstance.post('/user/messages/send', {
+                senderId: user.id,
+                receiverId: selectedChat.id,
+                text: input,
+                time: now
+            })
+
+            const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
+            if (response.data.contacts) {
+                setChatList(response.data.contacts);
+            }
+        } catch (err) {
+            console.error("Failed to send message:", err);
+        }
+
         socketRef.current.emit('send-message', msg)
         setInput('')
-        setChatList(prev =>
-            prev.map(chat =>
-                chat.id === selectedChat.id
-                    ? {
-                        ...chat,
-                        lastMessage: msg.text,
-                        lastMessageTime: formatTime(now)
-                    }
-                    : chat
-            )
-        )
     }
+
+    useEffect(() => {
+        if (!selectedChat && chatList.length > 0) {
+            setSelectedChat(chatList[0]);
+        }
+    }, [chatList, selectedChat]);
 
     return (
         <div className={style.appBg}>
@@ -110,17 +183,27 @@ const ChatWindow = () => {
             <ChatListPanel
                 style={style}
                 chatList={chatList}
-                selectedChat={selectedChat}
+                selectedChat={selectedChat || {}}
                 setSelectedChat={setSelectedChat}
+                setChatList={setChatList}
             />
-            <ChatMain
-                style={style}
-                selectedChat={selectedChat}
-                input={input}
-                setInput={setInput}
-                messages={messages}
-                onSend={handleSend}
-            />
+            {selectedChat ? (
+                <ChatMain
+                    style={style}
+                    selectedChat={selectedChat}
+                    input={input}
+                    setInput={setInput}
+                    messages={messages}
+                    onSend={handleSend}
+                />
+            ) : (
+                <div className={style.chatMain} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ textAlign: 'center', color: '#888' }}>
+                        <h3>No conversations yet</h3>
+                        <p style={{ marginTop: '10px' }}>Search for users to start chatting</p>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
