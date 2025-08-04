@@ -16,7 +16,12 @@ app.use(express.json());
 const pool = require('./config/db');
 
 const registerRoute = require('./routes/register');
+const loginRoute = require('./routes/login');
 app.use('/api/register', registerRoute);
+app.use('/api/login', loginRoute);
+app.use('/api', (req, res) => {
+    res.status(404).json({ error: 'API route not found' });
+});
 
 const io = new Server(server, {
     cors: {
