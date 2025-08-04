@@ -19,6 +19,8 @@ const Registration = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
 
     const handleNumberChange = (e) => {
         setNumber(formatGeorgianNumber(e.target.value));
@@ -27,8 +29,17 @@ const Registration = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError("");
+
+        // Simple validation
+        if (!username || !email || !password || !number) {
+            setError("All fields are required");
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await fetch("/api/register", {
+            const response = await fetch("http://localhost:3000/api/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -38,23 +49,47 @@ const Registration = () => {
                     password
                 })
             });
-            if (response.ok) {
-                alert("Registration successful!");
-            } else {
-                const error = await response.json();
-                alert(error.error || error.message || "Registration failed"); // use error.error
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Registration failed");
             }
+
+            // Save token to localStorage
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            setSuccess(true);
+            // Redirect to login or dashboard
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1500);
+
         } catch (err) {
-            alert("Network error");
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
         <div className={styles.loginBg}>
             <div className={styles.loginContainer}>
                 <img src={logo} alt="Gorgia Logo" className={styles.logo} />
-                {/* <h2 className={styles.title}>Create your account</h2> */}
+
+                {success && (
+                    <div className={styles.successMessage}>
+                        Registration successful! Redirecting...
+                    </div>
+                )}
+
+                {error && (
+                    <div className={styles.errorMessage}>
+                        {error}
+                    </div>
+                )}
+
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.inputGroup}>
                         <span className={styles.inputIcon}></span>
