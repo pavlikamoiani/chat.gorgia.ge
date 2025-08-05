@@ -29,7 +29,11 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                 </div>
                 <div className={style.headerInfo}>
                     <div className={style.headerInfoNameActivity}>
-                        <span className={style.headerName}>{selectedChat.name}</span>
+                        <span className={style.headerName}>
+                            {selectedChat.name
+                                ? selectedChat.name[0].toUpperCase() + selectedChat.name.slice(1)
+                                : ''}
+                        </span>
                         {/* <span className={style.headerStatus}>Online</span> */}
                     </div>
                     <div className={style.headerInfoChatFilesPhotos}>

@@ -131,7 +131,9 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                                 {chat.name ? chat.name[0].toUpperCase() : ''}
                             </div>
                             <div className={style.chatInfo}>
-                                <span className={style.chatName}>{chat.name}</span>
+                                <span className={style.chatName}>{chat.name
+                                    ? chat.name[0].toUpperCase() + chat.name.slice(1)
+                                    : ''}</span>
                                 <span className={style.lastMsg}>
                                     <span style={chat.unread ? { fontWeight: 'bold', color: '#fff' } : {}}>
                                         {chat.lastMessage}
