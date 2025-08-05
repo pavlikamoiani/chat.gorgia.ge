@@ -19,6 +19,7 @@ const ChatWindow = () => {
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState(new Set());
+    const [replyTo, setReplyTo] = useState(null);
     const socketRef = useRef(null)
     const navigate = useNavigate()
 
@@ -151,12 +152,21 @@ const ChatWindow = () => {
         const fetchMessages = async () => {
             try {
                 const res = await defaultInstance.get(`/user/messages/${user.id}/${selectedChat.id}`)
-                const msgs = (res.data.messages || []).map(msg => ({
+                const msgsRaw = res.data.messages || [];
+                // Build a map for fast lookup
+                const msgMap = {};
+                msgsRaw.forEach(msg => { msgMap[msg.id] = msg; });
+                const msgs = msgsRaw.map(msg => ({
                     id: msg.id,
                     text: msg.text,
                     senderId: msg.sender_id,
                     time: msg.time,
-                    fromMe: msg.sender_id === user.id
+                    fromMe: msg.sender_id === user.id,
+                    replyTo: msg.parent_message_id ? {
+                        id: msg.parent_message_id,
+                        text: msgMap[msg.parent_message_id]?.text || '',
+                        fromMe: msgMap[msg.parent_message_id]?.sender_id === user.id
+                    } : null
                 }))
                 setMessages(msgs)
             } catch (err) {
@@ -166,7 +176,7 @@ const ChatWindow = () => {
         fetchMessages()
     }, [selectedChat?.id, user?.id])
 
-    const handleSend = async e => {
+    const handleSend = async (e, replyMsg) => {
         e.preventDefault()
         if (!input.trim() || !myId || !user?.id || !selectedChat?.id) return
         const now = Date.now()
@@ -176,14 +186,21 @@ const ChatWindow = () => {
             senderId: myId,
             senderDbId: user.id,
             receiverDbId: selectedChat.id,
-            time: now
+            time: now,
+            replyTo: replyMsg ? {
+                id: replyMsg.id,
+                text: replyMsg.text,
+                fromMe: replyMsg.fromMe
+            } : null,
+            parentMessageId: replyMsg ? replyMsg.id : null
         }
         try {
             await defaultInstance.post('/user/messages/send', {
                 senderId: user.id,
                 receiverId: selectedChat.id,
                 text: input,
-                time: now
+                time: now,
+                parentMessageId: replyMsg ? replyMsg.id : null
             })
 
             const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);

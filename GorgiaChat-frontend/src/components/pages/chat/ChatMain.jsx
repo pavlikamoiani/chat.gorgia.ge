@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FiVideo } from 'react-icons/fi'
 import { MdCalendarToday, MdPhone } from 'react-icons/md'
 import { FiSend } from 'react-icons/fi'
@@ -8,6 +8,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
     const { initiateCall } = useCall();
+    const [replyTo, setReplyTo] = useState(null);
 
     useEffect(() => {
         if (messagesAreaRef.current) {
@@ -19,6 +20,21 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
         if (selectedChat && selectedChat.id) {
             initiateCall(selectedChat.id);
         }
+    };
+
+    const handleReply = (msg) => {
+        setReplyTo(msg);
+    };
+
+    const handleCancelReply = () => {
+        setReplyTo(null);
+    };
+
+    const handleSendWithReply = (e) => {
+        e.preventDefault();
+        if (!input.trim()) return;
+        onSend(e, replyTo);
+        setReplyTo(null);
     };
 
     return (
@@ -77,14 +93,45 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                         <div
                             key={msg.id}
                             className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
+                            style={{ position: 'relative' }}
                         >
+                            <div className={style.msgHoverOverlay}>
+                                <button
+                                    className={style.replyBtnTop}
+                                    title="Reply"
+                                    onClick={() => handleReply(msg)}
+                                >
+                                    ↩
+                                </button>
+                            </div>
+                            {msg.replyTo && (
+                                <div className={style.replyPreviewInMsg}>
+                                    <span className={style.replySender}>
+                                        {msg.replyTo.fromMe ? "You" : selectedChat.name}
+                                    </span>
+                                    <span className={style.replyText}>
+                                        {msg.replyTo.text}
+                                    </span>
+                                </div>
+                            )}
                             <span>{msg.text}</span>
                         </div>
                     ))
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form className={style.inputArea} onSubmit={onSend}>
+            {replyTo && (
+                <div className={style.replyPreview}>
+                    <span className={style.replySender}>
+                        Replying to {replyTo.fromMe ? "yourself" : selectedChat.name}:
+                    </span>
+                    <span className={style.replyText}>
+                        {replyTo.text}
+                    </span>
+                    <button className={style.cancelReplyBtn} onClick={handleCancelReply}>✕</button>
+                </div>
+            )}
+            <form className={style.inputArea} onSubmit={handleSendWithReply}>
                 <button type="button" className={style.inputIconBtn} title="Attach">
                     <MdCalendarToday size={20} color="#888" />
                 </button>

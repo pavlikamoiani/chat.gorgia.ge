@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS messages (
   receiver_id INT NOT NULL,
   text TEXT NOT NULL,
   time BIGINT NOT NULL,
+  parent_message_id INT DEFAULT NULL,
   FOREIGN KEY (sender_id) REFERENCES users(id),
-  FOREIGN KEY (receiver_id) REFERENCES users(id)
+  FOREIGN KEY (receiver_id) REFERENCES users(id),
+  FOREIGN KEY (parent_message_id) REFERENCES messages(id)
 );

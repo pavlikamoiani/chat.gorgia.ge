@@ -336,6 +336,8 @@
     flex-direction: column;
     gap: 7px;
     background: #181818;
+    scrollbar-width: thin;
+    scrollbar-color: #0173b1 #232323;
 }
 
 .msgFromMe {
@@ -435,63 +437,126 @@
     background: #353535 !important;
 }
 
-@media (max-width: 900px) {
-    .chatListPanel {
-        width: 80px;
-        min-width: 60px;
-        border-radius: 18px 0 0 18px;
-    }
-
-    .chatListHeader,
-    .searchBar,
-    .chatInfo,
-    .lastMsg,
-    .chatName {
-        display: none;
-    }
-
-    .chatListItem {
-        justify-content: center;
-        padding: 12px 0;
-    }
+/* Custom scrollbar styles for chat window */
+.messagesArea::-webkit-scrollbar {
+    width: 8px;
+    background: #232323;
+    border-radius: 8px;
 }
 
-@media (max-width: 700px) {
-    .appBg {
-        flex-direction: column;
-    }
+.messagesArea::-webkit-scrollbar-thumb {
+    background: #353535;
+    border-radius: 8px;
+}
 
-    .sidebar {
-        flex-direction: row;
-        width: 100vw;
-        height: 56px;
-        min-width: 0;
-        border-right: none;
-        border-bottom: 1px solid #232323;
-        padding: 0 8px;
-    }
+.messagesArea::-webkit-scrollbar-thumb:hover {
+    background: #0173b1;
+}
 
-    .sidebarIcons {
-        flex-direction: row;
-        gap: 16px;
-        width: 100%;
-        justify-content: center;
-    }
+.replyBtn {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    background: none;
+    border: none;
+    color: #0173b1;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
 
-    .chatListPanel,
-    .chatMain {
-        margin: 0;
-        border-radius: 0;
-        box-shadow: none;
-    }
+.replyBtn:hover {
+    opacity: 1;
+    color: #005e91;
+}
 
-    .chatListPanel {
-        width: 100vw;
-        min-width: 0;
-    }
+.replyPreview {
+    background: #232323;
+    border-left: 4px solid #0173b1;
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: -8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
 
-    .chatMain {
-        width: 100vw;
-        min-width: 0;
-    }
+.replySender {
+    font-weight: bold;
+    color: #0173b1;
+    margin-right: 8px;
+}
+
+.replyText {
+    color: #fff;
+    font-size: 0.98rem;
+    font-style: italic;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cancelReplyBtn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.2rem;
+    margin-left: auto;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.cancelReplyBtn:hover {
+    color: #F44336;
+}
+
+.replyPreviewInMsg {
+    background: #353535;
+    border-left: 3px solid #0173b1;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    color: #b0b0b0;
+    font-style: italic;
+    max-width: 80%;
+}
+
+.msgHoverOverlay {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.msgFromMe:hover .msgHoverOverlay,
+.msgFromThem:hover .msgHoverOverlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.replyBtnTop {
+    background: #232323;
+    border: none;
+    color: #0173b1;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    padding: 4px 10px;
+    box-shadow: 0 2px 8px #0002;
+    transition: background 0.2s, color 0.2s;
+}
+
+.replyBtnTop:hover {
+    background: #0173b1;
+    color: #fff;
 }

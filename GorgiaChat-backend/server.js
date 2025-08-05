@@ -54,13 +54,10 @@ io.on('connection', (socket) => {
             connectedUsers.set(parsedUserId, socket.id);
             onlineUsers.add(parsedUserId);
 
-            // Broadcast to all clients that this user is now online
             io.emit('user-status-change', { userId: parsedUserId, isOnline: true });
 
-            // Send the current online users to the newly connected client
             socket.emit('online-users', Array.from(onlineUsers));
 
-            // Show all connected users for debugging
             console.log("Connected users:", Array.from(connectedUsers.entries()));
 
             if (userInfo) {
@@ -79,7 +76,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('call-user', async ({ to, from, offer }) => {
-        // Convert IDs to integers to ensure consistent key types in the Map
         const toId = parseInt(to);
         const fromId = parseInt(from.id);
 
@@ -90,7 +86,6 @@ io.on('connection', (socket) => {
 
         if (!toSocketId) {
             console.log(`Target user ${toId} not connected - socket not found`);
-            // Notify caller that recipient is not available
             socket.emit('call-failed', { reason: 'user-not-connected' });
             return;
         }
