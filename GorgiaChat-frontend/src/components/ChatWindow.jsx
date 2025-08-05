@@ -18,6 +18,7 @@ const ChatWindow = () => {
     const [activeSidebar, setActiveSidebar] = useState(0)
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
+    const [onlineUsers, setOnlineUsers] = useState(new Set());
     const socketRef = useRef(null)
     const navigate = useNavigate()
 
@@ -113,6 +114,27 @@ const ChatWindow = () => {
                 });
             }
         })
+
+        // Handle initial online users list
+        socketRef.current.on('online-users', (userIds) => {
+            console.log('Received online users:', userIds);
+            setOnlineUsers(new Set(userIds));
+        });
+
+        // Handle user status changes
+        socketRef.current.on('user-status-change', ({ userId, isOnline }) => {
+            console.log(`User ${userId} is now ${isOnline ? 'online' : 'offline'}`);
+            setOnlineUsers(prev => {
+                const newSet = new Set(prev);
+                if (isOnline) {
+                    newSet.add(userId);
+                } else {
+                    newSet.delete(userId);
+                }
+                return newSet;
+            });
+        });
+
         return () => {
             console.log("Disconnecting socket");
             socketRef.current.disconnect();
@@ -185,6 +207,17 @@ const ChatWindow = () => {
         )
     }
 
+    // Add online status to chat list and selected chat
+    const chatListWithStatus = chatList.map(chat => ({
+        ...chat,
+        isOnline: onlineUsers.has(chat.id)
+    }));
+
+    const selectedChatWithStatus = selectedChat ? {
+        ...selectedChat,
+        isOnline: onlineUsers.has(selectedChat.id)
+    } : null;
+
     return (
         <div className={style.appBg}>
             <Sidebar
@@ -200,15 +233,15 @@ const ChatWindow = () => {
             />
             <ChatListPanel
                 style={style}
-                chatList={chatList}
-                selectedChat={selectedChat || {}}
+                chatList={chatListWithStatus}
+                selectedChat={selectedChatWithStatus || {}}
                 setSelectedChat={handleSelectChat}
                 setChatList={setChatList}
             />
             {selectedChat ? (
                 <ChatMain
                     style={style}
-                    selectedChat={selectedChat}
+                    selectedChat={selectedChatWithStatus}
                     input={input}
                     setInput={setInput}
                     messages={messages}

@@ -120,20 +120,29 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                         No conversations yet
                     </div>
                 ) : (
-
                     chatList.map(chat => (
                         <div
                             key={chat.id}
                             className={style.chatListItem + ' ' + (selectedChat?.id === chat.id ? style.activeChat : '')}
                             onClick={() => setSelectedChat(chat)}
                         >
-                            <div className={style.avatar}>
-                                {chat.name ? chat.name[0].toUpperCase() : ''}
+                            <div className={style.avatarContainer}>
+                                <div className={style.avatar}>
+                                    {chat.name ? chat.name[0].toUpperCase() : ''}
+                                </div>
+                                <div
+                                    className={`${style.statusIndicator} ${chat.isOnline ? style.online : style.offline}`}
+                                    title={chat.isOnline ? "Online" : "Offline"}
+                                ></div>
                             </div>
                             <div className={style.chatInfo}>
-                                <span className={style.chatName}>{chat.name
-                                    ? chat.name[0].toUpperCase() + chat.name.slice(1)
-                                    : ''}</span>
+                                <div className={style.chatNameContainer}>
+                                    <span className={style.chatName}>{chat.name
+                                        ? chat.name[0].toUpperCase() + chat.name.slice(1)
+                                        : ''}</span>
+                                    {/* Can add text indicator here if desired */}
+                                    {/* {chat.isOnline && <span className={style.onlineText}>Online</span>} */}
+                                </div>
                                 <span className={style.lastMsg}>
                                     <span style={chat.unread ? { fontWeight: 'bold', color: '#fff' } : {}}>
                                         {chat.lastMessage}

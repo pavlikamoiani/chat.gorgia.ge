@@ -24,8 +24,14 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
     return (
         <main className={style.chatMain}>
             <header className={style.chatHeader}>
-                <div className={style.headerAvatar}>
-                    {selectedChat.name ? selectedChat.name[0].toUpperCase() : ''}
+                <div className={style.headerAvatarContainer}>
+                    <div className={style.headerAvatar}>
+                        {selectedChat.name ? selectedChat.name[0].toUpperCase() : ''}
+                    </div>
+                    <div
+                        className={`${style.statusIndicator} ${selectedChat.isOnline ? style.online : style.offline}`}
+                        title={selectedChat.isOnline ? "Online" : "Offline"}
+                    ></div>
                 </div>
                 <div className={style.headerInfo}>
                     <div className={style.headerInfoNameActivity}>
@@ -34,7 +40,9 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                                 ? selectedChat.name[0].toUpperCase() + selectedChat.name.slice(1)
                                 : ''}
                         </span>
-                        {/* <span className={style.headerStatus}>Online</span> */}
+                        <span className={style.headerStatus} style={{ color: selectedChat.isOnline ? '#4CAF50' : '#F44336' }}>
+                            {selectedChat.isOnline ? 'Online' : 'Offline'}
+                        </span>
                     </div>
                     <div className={style.headerInfoChatFilesPhotos}>
                         <a href='#'>Chat</a>

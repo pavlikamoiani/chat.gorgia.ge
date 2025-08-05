@@ -42,6 +42,7 @@ const io = new Server(server, {
 });
 
 const connectedUsers = new Map();
+const onlineUsers = new Set(); // Track online users by their IDs
 
 io.on('connection', (socket) => {
     console.log('New user connected:', socket.id);
@@ -49,8 +50,16 @@ io.on('connection', (socket) => {
     // User connects immediately on load - store their socket ID
     socket.on('user-connected', ({ userId, userInfo }) => {
         if (userId) {
-            console.log(`User ${userId} (${userInfo?.username || 'unknown'}) connected with socket ${socket.id}`);
-            connectedUsers.set(parseInt(userId), socket.id);
+            const parsedUserId = parseInt(userId);
+            console.log(`User ${parsedUserId} (${userInfo?.username || 'unknown'}) connected with socket ${socket.id}`);
+            connectedUsers.set(parsedUserId, socket.id);
+            onlineUsers.add(parsedUserId);
+
+            // Broadcast to all clients that this user is now online
+            io.emit('user-status-change', { userId: parsedUserId, isOnline: true });
+
+            // Send the current online users to the newly connected client
+            socket.emit('online-users', Array.from(onlineUsers));
 
             // Show all connected users for debugging
             console.log("Connected users:", Array.from(connectedUsers.entries()));
@@ -166,13 +175,22 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Remove user from connected users map
+        let disconnectedUserId = null;
         for (const [userId, socketId] of connectedUsers.entries()) {
             if (socketId === socket.id) {
+                disconnectedUserId = userId;
                 console.log(`Removing user ${userId} from connected users`);
                 connectedUsers.delete(userId);
+                onlineUsers.delete(userId);
                 break;
             }
         }
+
+        // Notify all clients about user going offline
+        if (disconnectedUserId) {
+            io.emit('user-status-change', { userId: disconnectedUserId, isOnline: false });
+        }
+
         console.log("Remaining connected users:", Array.from(connectedUsers.entries()));
     });
 });
