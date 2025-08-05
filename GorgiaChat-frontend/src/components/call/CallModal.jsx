@@ -1,15 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { MdCallEnd, MdMic, MdMicOff } from 'react-icons/md';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { MdCallEnd, MdMic, MdMicOff, MdVideocam, MdVideocamOff } from 'react-icons/md';
 import { useCall } from '../../contexts/CallContext';
 import styles from '../../assets/css/CallModal.module.css';
 
 const CallModal = () => {
-    const { callState, endCall, toggleMute, setAudioRef } = useCall();
-    const { isCallActive, isMuted, caller, receiver } = callState;
+    const { callState, endCall, toggleMute, toggleVideo, setAudioRef, setVideoRefs } = useCall();
+    const { isCallActive, isMuted, isVideoEnabled, isVideoCall, caller, receiver } = callState;
     const [displayName, setDisplayName] = useState('');
     const [displayAvatar, setDisplayAvatar] = useState('?');
 
+    const localVideoRef = useRef(null);
+    const remoteVideoRef = useRef(null);
+
     const otherParticipant = caller || receiver;
+
+    // Use useLayoutEffect to ensure references are set before any rendering happens
+    useLayoutEffect(() => {
+        console.log("CallModal: Setting video refs on mount");
+        setVideoRefs(localVideoRef.current, remoteVideoRef.current);
+    }, []);
+
+    useEffect(() => {
+        console.log("CallModal: call state updated", { isCallActive, isVideoCall });
+
+        if (isCallActive && isVideoCall) {
+            console.log("CallModal: Updating video refs after call became active");
+            setVideoRefs(localVideoRef.current, remoteVideoRef.current);
+        }
+    }, [isCallActive, isVideoCall, setVideoRefs]);
 
     useEffect(() => {
         console.log("Call state updated:", callState);
@@ -50,21 +68,56 @@ const CallModal = () => {
     if (!isCallActive) return null;
 
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
+        <div className={`${styles.modalOverlay} ${isVideoCall ? styles.videoCall : ''}`}>
+            <div className={`${styles.modalContent} ${isVideoCall ? styles.videoContent : ''}`}>
                 <audio ref={setAudioRef} autoPlay />
 
-                <div className={styles.callInfo}>
-                    <div className={styles.callerAvatar}>
-                        {displayAvatar}
+                {isVideoCall && (
+                    <div className={styles.videoContainer}>
+                        <video
+                            ref={remoteVideoRef}
+                            className={styles.remoteVideo}
+                            autoPlay
+                            playsInline
+                        />
+                        <video
+                            ref={localVideoRef}
+                            className={styles.localVideo}
+                            autoPlay
+                            playsInline
+                            muted
+                        />
+
+                        <div className={styles.videoStatus}>
+                            {isVideoEnabled ? 'Video active' : 'Video paused'}
+                        </div>
+
+                        {!isVideoEnabled && (
+                            <div className={styles.noVideoOverlay}>
+                                <div className={styles.callerAvatar}>
+                                    {displayAvatar}
+                                </div>
+                                <div className={styles.callerName}>
+                                    {displayName}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div className={styles.callerName}>
-                        {displayName}
+                )}
+
+                {!isVideoCall && (
+                    <div className={styles.callInfo}>
+                        <div className={styles.callerAvatar}>
+                            {displayAvatar}
+                        </div>
+                        <div className={styles.callerName}>
+                            {displayName}
+                        </div>
+                        <div className={styles.callStatus}>
+                            Call in progress...
+                        </div>
                     </div>
-                    <div className={styles.callStatus}>
-                        Call in progress...
-                    </div>
-                </div>
+                )}
 
                 <div className={styles.callControls}>
                     <button
@@ -74,6 +127,16 @@ const CallModal = () => {
                     >
                         {isMuted ? <MdMicOff size={24} /> : <MdMic size={24} />}
                     </button>
+
+                    {isVideoCall && (
+                        <button
+                            className={`${styles.callButton} ${!isVideoEnabled ? styles.active : ''}`}
+                            onClick={toggleVideo}
+                            title={isVideoEnabled ? "Turn off camera" : "Turn on camera"}
+                        >
+                            {isVideoEnabled ? <MdVideocam size={24} /> : <MdVideocamOff size={24} />}
+                        </button>
+                    )}
 
                     <button
                         className={`${styles.callButton} ${styles.endCall}`}

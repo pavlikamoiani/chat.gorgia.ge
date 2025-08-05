@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { MdCallEnd, MdCall } from 'react-icons/md';
+import { MdCallEnd, MdCall, MdVideocam } from 'react-icons/md';
 import { useCall } from '../../contexts/CallContext';
 import styles from '../../assets/css/CallModal.module.css';
 
 const IncomingCallModal = () => {
     const { callState, acceptCall, rejectCall } = useCall();
-    const { isReceivingCall, caller } = callState;
+    const { isReceivingCall, isVideoCall, caller } = callState;
     const [displayName, setDisplayName] = useState('');
     const [displayAvatar, setDisplayAvatar] = useState('?');
     const [blink, setBlink] = useState(false);
@@ -83,7 +83,14 @@ const IncomingCallModal = () => {
                         {displayName}
                     </div>
                     <div className={styles.callStatus}>
-                        Incoming call...
+                        {isVideoCall ? (
+                            <div className={styles.videoCallIndicator}>
+                                <MdVideocam size={18} style={{ marginRight: '6px' }} />
+                                Incoming video call...
+                            </div>
+                        ) : (
+                            "Incoming call..."
+                        )}
                     </div>
                 </div>
 

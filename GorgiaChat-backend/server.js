@@ -75,11 +75,12 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('call-user', async ({ to, from, offer }) => {
+    socket.on('call-user', async ({ to, from, offer, isVideo }) => {
         const toId = parseInt(to);
         const fromId = parseInt(from.id);
 
-        console.log(`Call request from: ${fromId} (${from?.username || 'unknown'}) to: ${toId}`);
+        console.log(`Call request from: ${fromId} (${from?.username || 'unknown'}) to: ${toId}`,
+            isVideo ? '(video call)' : '(audio call)');
         console.log("Connected users:", Array.from(connectedUsers.entries()));
 
         const toSocketId = connectedUsers.get(toId);
@@ -102,7 +103,8 @@ io.on('connection', (socket) => {
                 console.log(`Sending incoming call to ${toId} from ${users[0].username}`);
                 socket.to(toSocketId).emit('incoming-call', {
                     from: users[0],
-                    offer
+                    offer,
+                    isVideo
                 });
             } else {
                 const callerInfo = {
@@ -113,7 +115,8 @@ io.on('connection', (socket) => {
                 console.log(`Sending incoming call to ${toId} from ${callerInfo.username}`);
                 socket.to(toSocketId).emit('incoming-call', {
                     from: callerInfo,
-                    offer
+                    offer,
+                    isVideo
                 });
             }
         } catch (err) {
@@ -125,7 +128,8 @@ io.on('connection', (socket) => {
             };
             socket.to(toSocketId).emit('incoming-call', {
                 from: callerInfo,
-                offer
+                offer,
+                isVideo
             });
         }
     });

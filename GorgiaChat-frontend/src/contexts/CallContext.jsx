@@ -9,6 +9,8 @@ export const CallProvider = ({ children }) => {
         isReceivingCall: false,
         isCallActive: false,
         isMuted: false,
+        isVideoEnabled: false,
+        isVideoCall: false,
         caller: null,
         receiver: null,
         callRejected: false,
@@ -20,6 +22,8 @@ export const CallProvider = ({ children }) => {
     const localStreamRef = useRef();
     const remoteStreamRef = useRef();
     const remoteAudioRef = useRef();
+    const localVideoRef = useRef();
+    const remoteVideoRef = useRef();
 
     const configuration = {
         iceServers: [
@@ -43,8 +47,8 @@ export const CallProvider = ({ children }) => {
             });
         }
 
-        socketRef.current.on('incoming-call', async ({ from, offer }) => {
-            console.log("🔔 Received incoming call from:", from);
+        socketRef.current.on('incoming-call', async ({ from, offer, isVideo }) => {
+            console.log("🔔 Received incoming call from:", from, isVideo ? "(video call)" : "(audio call)");
 
             try {
                 const audio = new Audio('/sounds/ringtone.mp3');
@@ -66,12 +70,14 @@ export const CallProvider = ({ children }) => {
             setCallState(prev => ({
                 ...prev,
                 isReceivingCall: true,
+                isVideoCall: isVideo,
                 caller: callerInfo
             }));
 
             peerConnectionRef.current = {
                 from: callerInfo,
-                offer
+                offer,
+                isVideo
             };
         });
 
@@ -129,21 +135,48 @@ export const CallProvider = ({ children }) => {
         };
     }, [user?.id]);
 
-    const initiateCall = async (receiverId) => {
+    const initiateCall = async (receiverId, withVideo = false) => {
+        console.log(`Initiating ${withVideo ? 'video' : 'audio'} call to user ${receiverId}`);
+
         try {
-            localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: false
-            });
+            // Check if browser supports getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Your browser doesn't support media devices. Please use a modern browser.");
+                return;
+            }
+
+            // Request media with proper constraints
+            console.log("Requesting media access:", { audio: true, video: withVideo });
+
+            try {
+                localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: withVideo ? { width: 640, height: 480 } : false
+                });
+
+                console.log("Media access granted:",
+                    `audio tracks: ${localStreamRef.current.getAudioTracks().length}`,
+                    `video tracks: ${localStreamRef.current.getVideoTracks().length}`);
+            } catch (mediaError) {
+                console.error("Failed to get media access:", mediaError);
+                if (mediaError.name === "NotAllowedError") {
+                    alert("Camera/microphone access denied. Please grant permission to use video calls.");
+                } else {
+                    alert(`Media error: ${mediaError.message || mediaError.name}`);
+                }
+                return;
+            }
 
             const peerConnection = new RTCPeerConnection(configuration);
 
             localStreamRef.current.getTracks().forEach(track => {
+                console.log(`Adding ${track.kind} track to peer connection`);
                 peerConnection.addTrack(track, localStreamRef.current);
             });
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
+                    console.log("ICE candidate generated", event.candidate.candidate.substring(0, 50) + "...");
                     socketRef.current.emit('ice-candidate', {
                         to: receiverId,
                         candidate: event.candidate
@@ -152,18 +185,27 @@ export const CallProvider = ({ children }) => {
             };
 
             peerConnection.ontrack = (event) => {
+                console.log(`Remote ${event.track.kind} track received`);
                 remoteStreamRef.current = event.streams[0];
+
                 if (remoteAudioRef.current) {
                     remoteAudioRef.current.srcObject = remoteStreamRef.current;
                 }
+
+                if (remoteVideoRef.current && event.track.kind === 'video') {
+                    remoteVideoRef.current.srcObject = remoteStreamRef.current;
+                }
             };
 
+            console.log("Creating offer");
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
+            console.log("Offer created and set as local description");
 
             peerConnectionRef.current = {
                 connection: peerConnection,
-                to: receiverId
+                to: receiverId,
+                isVideo: withVideo
             };
 
             let receiverInfo = { id: receiverId };
@@ -187,22 +229,29 @@ export const CallProvider = ({ children }) => {
                 email: user.email || sessionStorage.getItem('email') || localStorage.getItem('email')
             };
 
-            console.log("Sending call with user info:", completeUserInfo);
-            console.log("To receiver:", receiverInfo);
-
+            console.log(`Emitting call-user event to ${receiverId}, with video: ${withVideo}`);
             socketRef.current.emit('call-user', {
                 to: receiverId,
                 from: completeUserInfo,
-                offer
+                offer,
+                isVideo: withVideo
             });
+
+            if (localVideoRef.current && withVideo) {
+                console.log("Setting local video element source");
+                localVideoRef.current.srcObject = localStreamRef.current;
+            }
 
             setCallState(prev => ({
                 ...prev,
                 isCallActive: true,
+                isVideoEnabled: withVideo,
+                isVideoCall: withVideo,
                 receiver: receiverInfo
             }));
         } catch (error) {
             console.error("Error initiating call:", error);
+            alert(`Error starting call: ${error.message || "Unknown error"}`);
             cleanupCall();
         }
     };
@@ -213,12 +262,12 @@ export const CallProvider = ({ children }) => {
                 sessionStorage.removeItem('ringtone');
             }
 
-            const { from, offer } = peerConnectionRef.current;
-            console.log("Accepting call from:", from);
+            const { from, offer, isVideo } = peerConnectionRef.current;
+            console.log("Accepting call from:", from, isVideo ? "(video call)" : "(audio call)");
 
             localStreamRef.current = await navigator.mediaDevices.getUserMedia({
                 audio: true,
-                video: false
+                video: isVideo
             });
 
             const peerConnection = new RTCPeerConnection(configuration);
@@ -238,8 +287,13 @@ export const CallProvider = ({ children }) => {
 
             peerConnection.ontrack = (event) => {
                 remoteStreamRef.current = event.streams[0];
+
                 if (remoteAudioRef.current) {
                     remoteAudioRef.current.srcObject = remoteStreamRef.current;
+                }
+
+                if (remoteVideoRef.current && event.track.kind === 'video') {
+                    remoteVideoRef.current.srcObject = remoteStreamRef.current;
                 }
             };
 
@@ -250,7 +304,8 @@ export const CallProvider = ({ children }) => {
 
             peerConnectionRef.current = {
                 connection: peerConnection,
-                to: from.id
+                to: from.id,
+                isVideo
             };
 
             socketRef.current.emit('call-answer', {
@@ -259,10 +314,16 @@ export const CallProvider = ({ children }) => {
                 accepted: true
             });
 
+            if (localVideoRef.current && isVideo) {
+                localVideoRef.current.srcObject = localStreamRef.current;
+            }
+
             setCallState(prev => ({
                 ...prev,
                 isReceivingCall: false,
                 isCallActive: true,
+                isVideoEnabled: isVideo,
+                isVideoCall: isVideo,
                 caller: from
             }));
         } catch (error) {
@@ -313,6 +374,20 @@ export const CallProvider = ({ children }) => {
         }
     };
 
+    const toggleVideo = () => {
+        if (!localStreamRef.current || !callState.isVideoCall) return;
+
+        const videoTracks = localStreamRef.current.getVideoTracks();
+        if (videoTracks.length > 0) {
+            const track = videoTracks[0];
+            track.enabled = !track.enabled;
+            setCallState(prev => ({
+                ...prev,
+                isVideoEnabled: track.enabled
+            }));
+        }
+    };
+
     const cleanupCall = () => {
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => track.stop());
@@ -327,6 +402,8 @@ export const CallProvider = ({ children }) => {
             isReceivingCall: false,
             isCallActive: false,
             isMuted: false,
+            isVideoEnabled: false,
+            isVideoCall: false,
             caller: null,
             receiver: null,
             callRejected: prev.callRejected
@@ -342,6 +419,22 @@ export const CallProvider = ({ children }) => {
         }
     };
 
+    const setVideoRefs = (localRef, remoteRef) => {
+        console.log("Setting video refs:", !!localRef, !!remoteRef);
+        localVideoRef.current = localRef;
+        remoteVideoRef.current = remoteRef;
+
+        if (localRef && localStreamRef.current) {
+            console.log("Updating local video element with stream");
+            localRef.srcObject = localStreamRef.current;
+        }
+
+        if (remoteRef && remoteStreamRef.current) {
+            console.log("Updating remote video element with stream");
+            remoteRef.srcObject = remoteStreamRef.current;
+        }
+    };
+
     return (
         <CallContext.Provider value={{
             callState,
@@ -350,7 +443,9 @@ export const CallProvider = ({ children }) => {
             rejectCall,
             endCall,
             toggleMute,
+            toggleVideo,
             setAudioRef,
+            setVideoRefs,
             dismissRejection: () => setCallState(prev => ({ ...prev, callRejected: false }))
         }}>
             {children}

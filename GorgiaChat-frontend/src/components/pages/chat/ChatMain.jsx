@@ -19,9 +19,41 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         }
     }, [messages]);
 
-    const handleCallClick = () => {
+    const handleAudioCallClick = () => {
         if (selectedChat && selectedChat.id) {
-            initiateCall(selectedChat.id);
+            initiateCall(selectedChat.id, false);
+        }
+    };
+
+    const handleVideoCallClick = () => {
+        if (selectedChat && selectedChat.id) {
+            console.log("Video call button clicked for:", selectedChat.name);
+
+            // Check if browser supports getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Your browser doesn't support video calls. Please use a modern browser.");
+                return;
+            }
+
+            // First check camera permission before initiating call
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    // Stop tracks immediately, we just needed permission check
+                    stream.getTracks().forEach(track => track.stop());
+
+                    // Permission granted, initiate call
+                    initiateCall(selectedChat.id, true);
+                })
+                .catch(err => {
+                    console.error("Camera permission error:", err);
+                    if (err.name === "NotAllowedError") {
+                        alert("Camera access denied. Please grant camera permission to make video calls.");
+                    } else {
+                        alert(`Error accessing camera: ${err.message || err.name}`);
+                    }
+                });
+        } else {
+            alert("No chat selected. Please select a chat first.");
         }
     };
 
@@ -84,13 +116,17 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                 </div>
 
                 <div className={style.headerActions}>
-                    <button className={style.headerBtn} title="Video call">
+                    <button
+                        className={style.headerBtn}
+                        title="Video call"
+                        onClick={handleVideoCallClick}
+                    >
                         <FiVideo size={20} color="#888" />
                     </button>
                     <button
                         className={style.headerBtn}
                         title="Voice call"
-                        onClick={handleCallClick}
+                        onClick={handleAudioCallClick}
                     >
                         <MdPhone size={20} color="#888" />
                     </button>

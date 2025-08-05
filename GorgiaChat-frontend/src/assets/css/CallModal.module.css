@@ -256,3 +256,126 @@
 .dismissButton:hover {
     background-color: #444;
 }
+
+/* Video call styles */
+.videoCall .modalContent {
+    width: 90vw;
+    max-width: 1200px;
+    height: 70vh;
+    max-height: 800px;
+    background-color: #1a1a1a;
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.videoContent {
+    width: 90vw;
+    max-width: 1200px;
+    height: 70vh;
+    max-height: 800px;
+    padding: 16px;
+}
+
+.videoContainer {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 80px);
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.localVideo {
+    position: absolute;
+    width: 180px;
+    height: 120px;
+    right: 16px;
+    bottom: 16px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border: 2px solid #0173b1;
+    z-index: 2;
+}
+
+.noVideoOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    z-index: 1;
+}
+
+.videoCallIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.videoStatus {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 3;
+    opacity: 0.7;
+}
+
+/* Make sure video elements are visible */
+.remoteVideo,
+.localVideo {
+    background: #000;
+}
+
+/* More visible indication when video is enabled but no stream is showing */
+.videoContainer {
+    background-color: #151515;
+    background-image: repeating-linear-gradient(45deg,
+            #1a1a1a,
+            #1a1a1a 10px,
+            #151515 10px,
+            #151515 20px);
+}
+
+/* Mobile-friendly adjustments */
+@media (max-width: 768px) {
+    .videoCall .modalContent {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 8px;
+    }
+
+    .localVideo {
+        width: 100px;
+        height: 80px;
+        right: 8px;
+        bottom: 8px;
+    }
+
+    .callControls {
+        padding: 12px 0;
+    }
+}
