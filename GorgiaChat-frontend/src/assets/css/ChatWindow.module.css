@@ -560,3 +560,93 @@
     background: #0173b1;
     color: #fff;
 }
+
+.forwardBtnTop {
+    background: #232323;
+    border: none;
+    color: #ff9800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    padding: 4px 10px;
+    margin-left: 6px;
+    box-shadow: 0 2px 8px #0002;
+    transition: background 0.2s, color 0.2s;
+}
+
+.forwardBtnTop:hover {
+    background: #ff9800;
+    color: #fff;
+}
+
+.forwardedLabel {
+    background: #ff9800;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 2px 10px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.forwardModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.forwardModalContent {
+    background: #232323;
+    border-radius: 12px;
+    padding: 24px 32px;
+    min-width: 260px;
+    box-shadow: 0 4px 24px #0008;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.forwardChatList {
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+}
+
+.forwardChatItem {
+    padding: 10px 0;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.forwardChatItem:hover {
+    background: #0173b1;
+    color: #fff;
+}
+
+.cancelForwardBtn {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+
+.cancelForwardBtn:hover {
+    background: #444;
+}

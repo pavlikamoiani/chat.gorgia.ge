@@ -2,13 +2,16 @@ import React, { useEffect, useRef, useState } from 'react'
 import { FiVideo } from 'react-icons/fi'
 import { MdCalendarToday, MdPhone } from 'react-icons/md'
 import { FiSend } from 'react-icons/fi'
+import { FaReply, FaShare } from 'react-icons/fa'
 import { useCall } from '../../../contexts/CallContext'
 
-const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) => {
+const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
     const { initiateCall } = useCall();
     const [replyTo, setReplyTo] = useState(null);
+    const [forwardMsg, setForwardMsg] = useState(null);
+    const [showForwardModal, setShowForwardModal] = useState(false);
 
     useEffect(() => {
         if (messagesAreaRef.current) {
@@ -35,6 +38,19 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
         if (!input.trim()) return;
         onSend(e, replyTo);
         setReplyTo(null);
+    };
+
+    const handleForward = (msg) => {
+        setForwardMsg(msg);
+        setShowForwardModal(true);
+    };
+
+    const handleSelectForwardChat = (chat) => {
+        if (forwardMsg && chat) {
+            onForward(forwardMsg, chat);
+        }
+        setShowForwardModal(false);
+        setForwardMsg(null);
     };
 
     return (
@@ -101,9 +117,19 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                                     title="Reply"
                                     onClick={() => handleReply(msg)}
                                 >
-                                    ↩
+                                    <FaReply />
+                                </button>
+                                <button
+                                    className={style.forwardBtnTop}
+                                    title="Forward"
+                                    onClick={() => handleForward(msg)}
+                                >
+                                    <FaShare />
                                 </button>
                             </div>
+                            {msg.forwarded && (
+                                <div className={style.forwardedLabel}>Forwarded</div>
+                            )}
                             {msg.replyTo && (
                                 <div className={style.replyPreviewInMsg}>
                                     <span className={style.replySender}>
@@ -146,6 +172,28 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                     <FiSend size={20} color="#fff" />
                 </button>
             </form>
+            {showForwardModal && (
+                <div className={style.forwardModalOverlay}>
+                    <div className={style.forwardModalContent}>
+                        <div style={{ fontWeight: 600, marginBottom: 12 }}>Forward to:</div>
+                        <div className={style.forwardChatList}>
+                            {chatList.filter(chat => chat.id !== selectedChat.id).map(chat => (
+                                <div
+                                    key={chat.id}
+                                    className={style.forwardChatItem}
+                                    onClick={() => handleSelectForwardChat(chat)}
+                                >
+                                    {chat.name}
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            className={style.cancelForwardBtn}
+                            onClick={() => setShowForwardModal(false)}
+                        >Cancel</button>
+                    </div>
+                </div>
+            )}
         </main>
     )
 }

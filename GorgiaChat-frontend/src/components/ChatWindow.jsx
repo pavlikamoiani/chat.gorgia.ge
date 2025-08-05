@@ -224,6 +224,35 @@ const ChatWindow = () => {
         )
     }
 
+    const handleForward = async (msg, targetChat) => {
+        if (!msg || !targetChat || !user?.id) return;
+        const now = Date.now();
+        const forwardMsg = {
+            id: now,
+            text: msg.text,
+            senderId: myId,
+            senderDbId: user.id,
+            receiverDbId: targetChat.id,
+            time: now,
+            forwarded: true,
+            replyTo: msg.replyTo || null,
+            parentMessageId: msg.replyTo ? msg.replyTo.id : null
+        };
+        try {
+            await defaultInstance.post('/user/messages/send', {
+                senderId: user.id,
+                receiverId: targetChat.id,
+                text: msg.text,
+                time: now,
+                parentMessageId: msg.replyTo ? msg.replyTo.id : null,
+                forwarded: true
+            });
+        } catch (err) {
+            console.error("Failed to forward message:", err);
+        }
+        socketRef.current.emit('send-message', forwardMsg);
+    }
+
     // Add online status to chat list and selected chat
     const chatListWithStatus = chatList.map(chat => ({
         ...chat,
@@ -263,6 +292,8 @@ const ChatWindow = () => {
                     setInput={setInput}
                     messages={messages}
                     onSend={handleSend}
+                    chatList={chatListWithStatus}
+                    onForward={handleForward}
                 />
             ) : (
                 <div className={style.chatMain} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

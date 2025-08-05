@@ -77,14 +77,14 @@ router.get('/search-user', async (req, res) => {
 });
 
 router.post('/messages/send', async (req, res) => {
-    const { senderId, receiverId, text, time, parentMessageId } = req.body;
+    const { senderId, receiverId, text, time, parentMessageId, forwarded } = req.body;
     if (!senderId || !receiverId || !text || !time) {
         return res.status(400).json({ error: 'Missing fields' });
     }
     try {
         await pool.query(
-            'INSERT INTO messages (sender_id, receiver_id, text, time, parent_message_id) VALUES (?, ?, ?, ?, ?)',
-            [senderId, receiverId, text, time, parentMessageId || null]
+            'INSERT INTO messages (sender_id, receiver_id, text, time, parent_message_id, forwarded) VALUES (?, ?, ?, ?, ?, ?)',
+            [senderId, receiverId, text, time, parentMessageId || null, forwarded ? 1 : 0]
         );
         res.json({ success: true });
     } catch (error) {
