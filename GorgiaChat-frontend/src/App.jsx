@@ -3,9 +3,12 @@ import ChatWindow from './components/ChatWindow';
 import MeetWindow from './components/pages/meet/MeetWindow';
 import Login from './components/pages/authentication/Login';
 import Registration from './components/pages/authentication/Registration';
-import Calendar from './components/pages/calendar/CalendarWindow'
-import Activity from './components/pages/activity/ActivityWindow'
+import Calendar from './components/pages/calendar/CalendarWindow';
+import Activity from './components/pages/activity/ActivityWindow';
 import ProtectedRoute from './components/ProtectedRoute';
+import CallModal from './components/call/CallModal';
+import IncomingCallModal from './components/call/IncomingCallModal';
+import RejectionModal from './components/call/RejectionModal';
 import './App.css';
 
 function App() {
@@ -47,6 +50,9 @@ function App() {
           }
         />
       </Routes>
+      <CallModal />
+      <IncomingCallModal />
+      <RejectionModal />
     </Router>
   );
 }

@@ -2,16 +2,24 @@ import React, { useEffect, useRef } from 'react'
 import { FiVideo } from 'react-icons/fi'
 import { MdCalendarToday, MdPhone } from 'react-icons/md'
 import { FiSend } from 'react-icons/fi'
+import { useCall } from '../../../contexts/CallContext'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) => {
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
+    const { initiateCall } = useCall();
 
     useEffect(() => {
         if (messagesAreaRef.current) {
             messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
         }
     }, [messages]);
+
+    const handleCallClick = () => {
+        if (selectedChat && selectedChat.id) {
+            initiateCall(selectedChat.id);
+        }
+    };
 
     return (
         <main className={style.chatMain}>
@@ -32,10 +40,14 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend }) =>
                 </div>
 
                 <div className={style.headerActions}>
-                    <button className={style.headerBtn} title="Call">
+                    <button className={style.headerBtn} title="Video call">
                         <FiVideo size={20} color="#888" />
                     </button>
-                    <button className={style.headerBtn} title="Phone">
+                    <button
+                        className={style.headerBtn}
+                        title="Voice call"
+                        onClick={handleCallClick}
+                    >
                         <MdPhone size={20} color="#888" />
                     </button>
                 </div>

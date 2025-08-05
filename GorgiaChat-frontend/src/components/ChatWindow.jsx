@@ -33,10 +33,10 @@ const ChatWindow = () => {
             try {
                 const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
                 if (response.data.contacts) {
-                    setChatList(response.data.contacts);
-                    // if (response.data.contacts.length > 0) {
-                    //     setSelectedChat(response.data.contacts[0]);
-                    // }
+                    const contacts = response.data.contacts;
+                    setChatList(contacts);
+                    // Store in localStorage for call context to use
+                    localStorage.setItem('chatList', JSON.stringify(contacts));
                 }
             } catch (error) {
                 console.error("Failed to fetch chat contacts:", error);
@@ -48,8 +48,23 @@ const ChatWindow = () => {
 
     useEffect(() => {
         socketRef.current = io('http://localhost:3000')
+
+        // Register user immediately on connection
         socketRef.current.on('connect', () => {
             setMyId(socketRef.current.id)
+
+            // Register user with socket for call functionality
+            if (user?.id) {
+                console.log("Registering user with socket:", user);
+                socketRef.current.emit('user-connected', {
+                    userId: parseInt(user.id),  // Ensure integer
+                    userInfo: {
+                        id: user.id,
+                        username: user.username,
+                        email: user.email
+                    }
+                });
+            }
         })
         socketRef.current.on('receive-message', msg => {
             setMessages(prev => {
@@ -99,9 +114,10 @@ const ChatWindow = () => {
             }
         })
         return () => {
-            socketRef.current.disconnect()
+            console.log("Disconnecting socket");
+            socketRef.current.disconnect();
         }
-    }, [user?.id, selectedChat?.id]);
+    }, [user?.id]);
 
     useEffect(() => {
         window.clearMessagesForNewChat = () => setMessages([])

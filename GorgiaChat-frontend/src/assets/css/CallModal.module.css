@@ -1,0 +1,258 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modalContent {
+    background-color: #232323;
+    border-radius: 16px;
+    padding: 32px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.4s ease-out;
+}
+
+.callInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.callerAvatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #0173b1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 42px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(1, 115, 177, 0.4);
+}
+
+.callerName {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.callStatus {
+    font-size: 16px;
+    color: #b0b0b0;
+}
+
+.callControls {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    justify-content: center;
+}
+
+.callButton {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+}
+
+.callButton:hover {
+    transform: scale(1.1);
+}
+
+.callButton:active {
+    transform: scale(0.95);
+}
+
+.callButton.active {
+    background-color: #ff5252;
+    color: white;
+}
+
+.acceptCall {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.rejectCall,
+.endCall {
+    background-color: #ff5252;
+    color: white;
+}
+
+.callButton:not(.active):not(.acceptCall):not(.rejectCall):not(.endCall) {
+    background-color: #333;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Adding pulsing animation for incoming call */
+.modalOverlay:has(.callStatus:contains("Incoming")) .callerAvatar {
+    animation: pulse 1.5s infinite;
+}
+
+.incomingCall .modalContent {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.blinking {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        border: 2px solid #4CAF50;
+    }
+
+    50% {
+        border: 2px solid transparent;
+    }
+
+    100% {
+        border: 2px solid #4CAF50;
+    }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+/* Rejection modal styles */
+.rejectionOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.rejectionContent {
+    background-color: #232323;
+    border-radius: 16px;
+    padding: 24px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.4s ease-out;
+}
+
+.rejectionIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #ff5252;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.rejectionMessage {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.dismissButton {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dismissButton:hover {
+    background-color: #444;
+}
