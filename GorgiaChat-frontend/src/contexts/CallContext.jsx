@@ -11,7 +11,7 @@ export const CallProvider = ({ children }) => {
         isMuted: false,
         caller: null,
         receiver: null,
-        callRejected: false,  // New state for showing rejection message
+        callRejected: false,
     });
 
     const user = useSelector(state => state.auth.user);
@@ -31,7 +31,6 @@ export const CallProvider = ({ children }) => {
     useEffect(() => {
         socketRef.current = io('http://localhost:3000');
 
-        // Register user if needed
         if (user?.id) {
             console.log("CallContext registering user with socket:", user.id);
             socketRef.current.emit('user-connected', {
@@ -44,11 +43,9 @@ export const CallProvider = ({ children }) => {
             });
         }
 
-        // Handle incoming call
         socketRef.current.on('incoming-call', async ({ from, offer }) => {
             console.log("🔔 Received incoming call from:", from);
 
-            // Play a ringtone
             try {
                 const audio = new Audio('/sounds/ringtone.mp3');
                 audio.loop = true;
@@ -58,7 +55,6 @@ export const CallProvider = ({ children }) => {
                 console.log("Could not play ringtone:", err);
             }
 
-            // Make sure we have a complete caller object
             const callerInfo = {
                 id: from.id,
                 username: from.username || from.name || `User ${from.id}`,
@@ -73,20 +69,17 @@ export const CallProvider = ({ children }) => {
                 caller: callerInfo
             }));
 
-            // Store the offer to use when accepting the call
             peerConnectionRef.current = {
                 from: callerInfo,
                 offer
             };
         });
 
-        // Handle call failures
         socketRef.current.on('call-failed', ({ reason }) => {
             alert(`Call failed: ${reason === 'user-not-connected' ? 'User is not online' : 'Connection error'}`);
             cleanupCall();
         });
 
-        // Handle call accepted
         socketRef.current.on('call-accepted', async ({ answer }) => {
             try {
                 const remoteDesc = new RTCSessionDescription(answer);
@@ -96,17 +89,14 @@ export const CallProvider = ({ children }) => {
             }
         });
 
-        // Handle call rejected
         socketRef.current.on('call-rejected', () => {
             console.log("Call was rejected");
 
-            // Instead of alert, set rejection state
             setCallState(prev => ({
                 ...prev,
                 callRejected: true
             }));
 
-            // Auto-dismiss after 5 seconds
             setTimeout(() => {
                 setCallState(prev => ({
                     ...prev,
@@ -117,7 +107,6 @@ export const CallProvider = ({ children }) => {
             cleanupCall();
         });
 
-        // Handle ICE candidates
         socketRef.current.on('ice-candidate', async ({ candidate }) => {
             try {
                 if (peerConnectionRef.current?.connection) {
@@ -130,7 +119,6 @@ export const CallProvider = ({ children }) => {
             }
         });
 
-        // Handle call ended
         socketRef.current.on('call-ended', () => {
             cleanupCall();
         });
@@ -143,21 +131,17 @@ export const CallProvider = ({ children }) => {
 
     const initiateCall = async (receiverId) => {
         try {
-            // Get user media (audio only)
             localStreamRef.current = await navigator.mediaDevices.getUserMedia({
                 audio: true,
                 video: false
             });
 
-            // Create peer connection
             const peerConnection = new RTCPeerConnection(configuration);
 
-            // Add tracks to the peer connection
             localStreamRef.current.getTracks().forEach(track => {
                 peerConnection.addTrack(track, localStreamRef.current);
             });
 
-            // Handle ICE candidates
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
                     socketRef.current.emit('ice-candidate', {
@@ -167,7 +151,6 @@ export const CallProvider = ({ children }) => {
                 }
             };
 
-            // Handle track events (remote audio)
             peerConnection.ontrack = (event) => {
                 remoteStreamRef.current = event.streams[0];
                 if (remoteAudioRef.current) {
@@ -175,20 +158,16 @@ export const CallProvider = ({ children }) => {
                 }
             };
 
-            // Create offer
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
 
-            // Store connection
             peerConnectionRef.current = {
                 connection: peerConnection,
                 to: receiverId
             };
 
-            // Find receiver info in chatList if available
             let receiverInfo = { id: receiverId };
             try {
-                // Try to get the selected chat info
                 const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
                 const selectedChat = chatList.find(chat => chat.id === receiverId);
                 if (selectedChat) {
@@ -202,7 +181,6 @@ export const CallProvider = ({ children }) => {
                 console.log("Could not get receiver info from chat list");
             }
 
-            // Make sure we have complete user info
             const completeUserInfo = {
                 id: user.id,
                 username: user.username || sessionStorage.getItem('username') || localStorage.getItem('username'),
@@ -212,7 +190,6 @@ export const CallProvider = ({ children }) => {
             console.log("Sending call with user info:", completeUserInfo);
             console.log("To receiver:", receiverInfo);
 
-            // Send offer to receiver with complete user info
             socketRef.current.emit('call-user', {
                 to: receiverId,
                 from: completeUserInfo,
@@ -232,7 +209,6 @@ export const CallProvider = ({ children }) => {
 
     const acceptCall = async () => {
         try {
-            // Stop the ringtone
             if (sessionStorage.getItem('ringtone') === 'playing') {
                 sessionStorage.removeItem('ringtone');
             }
@@ -240,21 +216,17 @@ export const CallProvider = ({ children }) => {
             const { from, offer } = peerConnectionRef.current;
             console.log("Accepting call from:", from);
 
-            // Get user media (audio only)
             localStreamRef.current = await navigator.mediaDevices.getUserMedia({
                 audio: true,
                 video: false
             });
 
-            // Create peer connection
             const peerConnection = new RTCPeerConnection(configuration);
 
-            // Add tracks to the peer connection
             localStreamRef.current.getTracks().forEach(track => {
                 peerConnection.addTrack(track, localStreamRef.current);
             });
 
-            // Handle ICE candidates
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
                     socketRef.current.emit('ice-candidate', {
@@ -264,7 +236,6 @@ export const CallProvider = ({ children }) => {
                 }
             };
 
-            // Handle track events (remote audio)
             peerConnection.ontrack = (event) => {
                 remoteStreamRef.current = event.streams[0];
                 if (remoteAudioRef.current) {
@@ -272,22 +243,18 @@ export const CallProvider = ({ children }) => {
                 }
             };
 
-            // Set remote description (offer)
             await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
-            // Create answer
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            // Store connection
             peerConnectionRef.current = {
                 connection: peerConnection,
                 to: from.id
             };
 
-            // Send answer to caller
             socketRef.current.emit('call-answer', {
-                to: parseInt(from.id), // Ensure integer
+                to: parseInt(from.id),
                 answer,
                 accepted: true
             });
@@ -305,7 +272,6 @@ export const CallProvider = ({ children }) => {
     };
 
     const rejectCall = () => {
-        // Stop the ringtone
         if (sessionStorage.getItem('ringtone') === 'playing') {
             sessionStorage.removeItem('ringtone');
         }
@@ -315,7 +281,7 @@ export const CallProvider = ({ children }) => {
         if (from) {
             console.log("Rejecting call from:", from.id);
             socketRef.current.emit('call-answer', {
-                to: parseInt(from.id), // Ensure integer
+                to: parseInt(from.id),
                 accepted: false
             });
         }
@@ -348,25 +314,22 @@ export const CallProvider = ({ children }) => {
     };
 
     const cleanupCall = () => {
-        // Stop local stream tracks
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => track.stop());
             localStreamRef.current = null;
         }
 
-        // Close peer connection
         if (peerConnectionRef.current?.connection) {
             peerConnectionRef.current.connection.close();
         }
 
-        // Reset call state but keep the rejection state if it's active
         setCallState(prev => ({
             isReceivingCall: false,
             isCallActive: false,
             isMuted: false,
             caller: null,
             receiver: null,
-            callRejected: prev.callRejected // Preserve the rejection state
+            callRejected: prev.callRejected
         }));
 
         peerConnectionRef.current = null;
@@ -388,7 +351,7 @@ export const CallProvider = ({ children }) => {
             endCall,
             toggleMute,
             setAudioRef,
-            dismissRejection: () => setCallState(prev => ({ ...prev, callRejected: false })) // Add a way to dismiss manually
+            dismissRejection: () => setCallState(prev => ({ ...prev, callRejected: false }))
         }}>
             {children}
         </CallContext.Provider>

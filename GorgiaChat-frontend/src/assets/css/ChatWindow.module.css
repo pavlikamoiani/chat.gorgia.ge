@@ -264,14 +264,12 @@
     }
 }
 
-/* Header avatar specific styling */
 .headerAvatarContainer .statusIndicator {
     width: 14px;
     height: 14px;
     border: 2px solid #181818;
 }
 
-/* Chat list avatar specific styling */
 .chatListItem .statusIndicator {
     bottom: 0;
     right: 0;

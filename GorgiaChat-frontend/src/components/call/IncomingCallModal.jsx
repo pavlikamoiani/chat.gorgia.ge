@@ -10,7 +10,6 @@ const IncomingCallModal = () => {
     const [displayAvatar, setDisplayAvatar] = useState('?');
     const [blink, setBlink] = useState(false);
 
-    // Add blinking effect
     useEffect(() => {
         if (isReceivingCall) {
             const blinkInterval = setInterval(() => {
@@ -27,7 +26,6 @@ const IncomingCallModal = () => {
         if (caller) {
             console.log("Caller info:", caller);
 
-            // Set display name with fallbacks
             if (caller.username) {
                 setDisplayName(caller.username);
                 setDisplayAvatar(caller.username[0].toUpperCase());
@@ -45,7 +43,6 @@ const IncomingCallModal = () => {
     }, [callState, caller]);
 
     useEffect(() => {
-        // Set up keypress listener to reject call with Escape key
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
                 rejectCall();
@@ -58,7 +55,6 @@ const IncomingCallModal = () => {
             console.log("Showing incoming call modal");
             window.addEventListener('keydown', handleKeyDown);
 
-            // Auto-reject call after 30 seconds if not answered
             const timeout = setTimeout(() => {
                 console.log("Auto-rejecting call after timeout");
                 rejectCall();

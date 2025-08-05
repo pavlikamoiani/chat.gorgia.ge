@@ -127,21 +127,31 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                             onClick={() => setSelectedChat(chat)}
                         >
                             <div className={style.avatarContainer}>
-                                <div className={style.avatar}>
+                                <div className={style.avatar} style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     {chat.name ? chat.name[0].toUpperCase() : ''}
+                                    <span
+                                        className={style.statusIndicator + ' ' + (chat.isOnline ? style.online : style.offline)}
+                                        title={chat.isOnline ? "Online" : "Offline"}
+                                        style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            bottom: 0,
+                                            width: 10,
+                                            height: 10,
+                                            borderRadius: '50%',
+                                            background: chat.isOnline ? '#4CAF50' : '#F44336',
+                                            border: '2px solid #232323',
+                                            display: 'inline-block'
+                                        }}
+                                    ></span>
                                 </div>
-                                <div
-                                    className={`${style.statusIndicator} ${chat.isOnline ? style.online : style.offline}`}
-                                    title={chat.isOnline ? "Online" : "Offline"}
-                                ></div>
                             </div>
                             <div className={style.chatInfo}>
                                 <div className={style.chatNameContainer}>
                                     <span className={style.chatName}>{chat.name
                                         ? chat.name[0].toUpperCase() + chat.name.slice(1)
-                                        : ''}</span>
-                                    {/* Can add text indicator here if desired */}
-                                    {/* {chat.isOnline && <span className={style.onlineText}>Online</span>} */}
+                                        : ''}
+                                    </span>
                                 </div>
                                 <span className={style.lastMsg}>
                                     <span style={chat.unread ? { fontWeight: 'bold', color: '#fff' } : {}}>

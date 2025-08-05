@@ -9,7 +9,6 @@ const CallModal = () => {
     const [displayName, setDisplayName] = useState('');
     const [displayAvatar, setDisplayAvatar] = useState('?');
 
-    // Get the other participant's info (either caller or receiver)
     const otherParticipant = caller || receiver;
 
     useEffect(() => {
@@ -18,7 +17,6 @@ const CallModal = () => {
         if (otherParticipant) {
             console.log("Other participant info:", otherParticipant);
 
-            // Set display name with fallbacks
             if (otherParticipant.username) {
                 setDisplayName(otherParticipant.username);
                 setDisplayAvatar(otherParticipant.username[0].toUpperCase());
@@ -35,7 +33,6 @@ const CallModal = () => {
         }
     }, [callState, otherParticipant]);
 
-    // Set up keypress listener to end call with Escape key
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {

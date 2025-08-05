@@ -42,12 +42,11 @@ const io = new Server(server, {
 });
 
 const connectedUsers = new Map();
-const onlineUsers = new Set(); // Track online users by their IDs
+const onlineUsers = new Set();
 
 io.on('connection', (socket) => {
     console.log('New user connected:', socket.id);
 
-    // User connects immediately on load - store their socket ID
     socket.on('user-connected', ({ userId, userInfo }) => {
         if (userId) {
             const parsedUserId = parseInt(userId);
@@ -174,7 +173,6 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // Remove user from connected users map
         let disconnectedUserId = null;
         for (const [userId, socketId] of connectedUsers.entries()) {
             if (socketId === socket.id) {
@@ -186,7 +184,6 @@ io.on('connection', (socket) => {
             }
         }
 
-        // Notify all clients about user going offline
         if (disconnectedUserId) {
             io.emit('user-status-change', { userId: disconnectedUserId, isOnline: false });
         }
