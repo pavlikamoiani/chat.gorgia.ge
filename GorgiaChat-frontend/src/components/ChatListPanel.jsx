@@ -120,6 +120,7 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                         No conversations yet
                     </div>
                 ) : (
+
                     chatList.map(chat => (
                         <div
                             key={chat.id}
