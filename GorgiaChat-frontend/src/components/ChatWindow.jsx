@@ -75,7 +75,7 @@ const ChatWindow = () => {
                             ...updatedChats[existingChatIndex],
                             lastMessage: msg.text,
                             lastMessageTime: msg.time || Date.now(),
-                            unread: !isChatOpen && msg.senderDbId !== user?.id // mark unread if not open and not from me
+                            unread: !isChatOpen && msg.senderDbId !== user?.id
                         };
                         return updatedChats.sort((a, b) =>
                             (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
@@ -85,7 +85,6 @@ const ChatWindow = () => {
                         defaultInstance.get(`/user/chat-contacts/${user.id}`)
                             .then(response => {
                                 if (response.data.contacts) {
-                                    // Add unread property for new chats
                                     setChatList(response.data.contacts.map(chat => ({
                                         ...chat,
                                         unread: !selectedChat || selectedChat.id !== chat.id
@@ -161,7 +160,6 @@ const ChatWindow = () => {
         setInput('')
     }
 
-    // Mark chat as read when selected
     const handleSelectChat = chat => {
         setSelectedChat(chat)
         setChatList(prev =>
