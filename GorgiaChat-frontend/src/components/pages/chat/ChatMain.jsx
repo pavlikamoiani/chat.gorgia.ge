@@ -197,5 +197,4 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         </main>
     )
 }
-
 export default ChatMain
