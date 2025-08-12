@@ -5,6 +5,7 @@ import { FiSend } from 'react-icons/fi'
 import { FaReply, FaShare } from 'react-icons/fa'
 import { useCall } from '../../../contexts/CallContext'
 import { FiImage } from 'react-icons/fi'
+import MessagesArea from './MessagesArea'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
     const messagesEndRef = useRef(null);
@@ -18,6 +19,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
     const [imagePreview, setImagePreview] = useState(null);
     const [imagePreviewName, setImagePreviewName] = useState("");
     const [fullscreenImage, setFullscreenImage] = useState(null);
+    const [activeTab, setActiveTab] = useState('Chat');
 
     useEffect(() => {
         if (messagesAreaRef.current) {
@@ -138,6 +140,14 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         setFullscreenImage(null);
     };
 
+    // Фильтрация сообщений по вкладке
+    let filteredMessages = messages;
+    if (activeTab === 'Photos') {
+        filteredMessages = messages.filter(msg => !!msg.image);
+    } else if (activeTab === 'Files') {
+        filteredMessages = messages.filter(msg => !!msg.file);
+    }
+
     return (
         <main className={style.chatMain}>
             <header className={style.chatHeader}>
@@ -162,9 +172,21 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                         </span>
                     </div>
                     <div className={style.headerInfoChatFilesPhotos}>
-                        <a href='#'>Chat</a>
-                        <a href='#'>Files</a>
-                        <a href='#'>Photos</a>
+                        <a
+                            href='#'
+                            className={activeTab === 'Chat' ? style.activeTab : ''}
+                            onClick={e => { e.preventDefault(); setActiveTab('Chat'); }}
+                        >Chat</a>
+                        <a
+                            href='#'
+                            className={activeTab === 'Files' ? style.activeTab : ''}
+                            onClick={e => { e.preventDefault(); setActiveTab('Files'); }}
+                        >Files</a>
+                        <a
+                            href='#'
+                            className={activeTab === 'Photos' ? style.activeTab : ''}
+                            onClick={e => { e.preventDefault(); setActiveTab('Photos'); }}
+                        >Photos</a>
                     </div>
                 </div>
 
@@ -185,74 +207,16 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                     </button>
                 </div>
             </header>
-            <div
-                className={style.messagesArea}
-                ref={messagesAreaRef}
-            >
-                {messages.length === 0 ? (
-                    <div style={{ color: '#888', textAlign: 'center', marginTop: '20px' }}>
-                        No messages yet. Start the conversation!
-                    </div>
-                ) : (
-                    messages.map(msg => (
-                        <div
-                            key={msg.id}
-                            className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
-                            style={{ position: 'relative' }}
-                        >
-                            <div className={style.msgHoverOverlay}>
-                                <button
-                                    className={style.replyBtnTop}
-                                    title="Reply"
-                                    onClick={() => handleReply(msg)}
-                                >
-                                    <FaReply />
-                                </button>
-                                <button
-                                    className={style.forwardBtnTop}
-                                    title="Forward"
-                                    onClick={() => handleForward(msg)}
-                                >
-                                    <FaShare />
-                                </button>
-                            </div>
-                            {msg.forwarded && (
-                                <div className={style.forwardedLabel}>Forwarded</div>
-                            )}
-                            {msg.replyTo && (
-                                <div className={style.replyPreviewInMsg}>
-                                    <span className={style.replySender}>
-                                        {msg.replyTo.fromMe ? "You" : selectedChat.name}
-                                    </span>
-                                    <span className={style.replyText}>
-                                        {msg.replyTo.text}
-                                    </span>
-                                </div>
-                            )}
-                            {msg.image && (
-                                <img
-                                    src={msg.image}
-                                    alt="img"
-                                    style={{
-                                        maxWidth: 180,
-                                        maxHeight: 180,
-                                        borderRadius: 8,
-                                        marginBottom: 6,
-                                        cursor: 'pointer'
-                                    }}
-                                    onClick={() => openFullscreenImage(msg.image)}
-                                    onError={(e) => {
-                                        console.error("Image failed to load:", e.target.src);
-                                        e.target.style.display = 'none';
-                                    }}
-                                />
-                            )}
-                            <span>{msg.text}</span>
-                        </div>
-                    ))
-                )}
-                <div ref={messagesEndRef} />
-            </div>
+            {/* Используем MessagesArea с фильтрованными сообщениями и активной вкладкой */}
+            <MessagesArea
+                style={style}
+                messages={filteredMessages}
+                activeTab={activeTab}
+                messagesAreaRef={messagesAreaRef}
+                openFullscreenImage={openFullscreenImage}
+                handleReply={handleReply}
+                handleForward={handleForward}
+            />
             {replyTo && (
                 <div className={style.replyPreview}>
                     <span className={style.replySender}>
