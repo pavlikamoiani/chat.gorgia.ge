@@ -5,6 +5,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const pool = require('./config/db');
+const path = require('path');
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ app.use(cors({
     credentials: false
 }));
 app.use(express.json());
+// Убедимся, что правильный путь используется для обслуживания изображений
+app.use('/images', express.static(path.join(__dirname, 'storage', 'images')));
 
 // Routes
 const registerRoute = require('./routes/register');

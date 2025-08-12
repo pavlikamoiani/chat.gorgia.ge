@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { FiVideo } from 'react-icons/fi'
+import { FiFile, FiVideo } from 'react-icons/fi'
 import { MdCalendarToday, MdPhone } from 'react-icons/md'
 import { FiSend } from 'react-icons/fi'
 import { FaReply, FaShare } from 'react-icons/fa'
 import { useCall } from '../../../contexts/CallContext'
+import { FiImage } from 'react-icons/fi'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
     const messagesEndRef = useRef(null);
@@ -12,6 +13,11 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
     const [replyTo, setReplyTo] = useState(null);
     const [forwardMsg, setForwardMsg] = useState(null);
     const [showForwardModal, setShowForwardModal] = useState(false);
+    const fileInputRef = useRef(null);
+    const imageInputRef = useRef(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [imagePreviewName, setImagePreviewName] = useState("");
+    const [fullscreenImage, setFullscreenImage] = useState(null);
 
     useEffect(() => {
         if (messagesAreaRef.current) {
@@ -29,19 +35,15 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         if (selectedChat && selectedChat.id) {
             console.log("Video call button clicked for:", selectedChat.name);
 
-            // Check if browser supports getUserMedia
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert("Your browser doesn't support video calls. Please use a modern browser.");
                 return;
             }
 
-            // First check camera permission before initiating call
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
-                    // Stop tracks immediately, we just needed permission check
                     stream.getTracks().forEach(track => track.stop());
 
-                    // Permission granted, initiate call
                     initiateCall(selectedChat.id, true);
                 })
                 .catch(err => {
@@ -67,9 +69,21 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
 
     const handleSendWithReply = (e) => {
         e.preventDefault();
-        if (!input.trim()) return;
-        onSend(e, replyTo);
+        if (!input.trim() && !imagePreview) return;
+
+        const messageData = {
+            text: input.trim(),
+            replyTo: replyTo,
+            image: imagePreview,
+            imageName: imagePreviewName
+        };
+
+        onSend(messageData);
+
         setReplyTo(null);
+        setImagePreview(null);
+        setImagePreviewName("");
+        setInput("");
     };
 
     const handleForward = (msg) => {
@@ -83,6 +97,45 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         }
         setShowForwardModal(false);
         setForwardMsg(null);
+    };
+
+    const handleFileIconClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleImageIconClick = () => {
+        if (imageInputRef.current) {
+            imageInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            alert(`Вы выбрали файл: ${file.name}`);
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImagePreviewName(file.name);
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setImagePreview(ev.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const openFullscreenImage = (imageUrl) => {
+        setFullscreenImage(imageUrl);
+    };
+
+    const closeFullscreenImage = () => {
+        setFullscreenImage(null);
     };
 
     return (
@@ -176,6 +229,24 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                                     </span>
                                 </div>
                             )}
+                            {msg.image && (
+                                <img
+                                    src={msg.image}
+                                    alt="img"
+                                    style={{
+                                        maxWidth: 180,
+                                        maxHeight: 180,
+                                        borderRadius: 8,
+                                        marginBottom: 6,
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => openFullscreenImage(msg.image)}
+                                    onError={(e) => {
+                                        console.error("Image failed to load:", e.target.src);
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            )}
                             <span>{msg.text}</span>
                         </div>
                     ))
@@ -193,10 +264,58 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                     <button className={style.cancelReplyBtn} onClick={handleCancelReply}>✕</button>
                 </div>
             )}
+            {imagePreview && (
+                <div className={style.imagePreviewBox}>
+                    <div className={style.imagePreviewIcon}>
+                        <FiImage />
+                    </div>
+                    <div className={style.imagePreviewInfo}>
+                        <span className={style.imagePreviewFilename}>{imagePreviewName}</span>
+                        <span className={style.imagePreviewSub}>Anyone with the link can edit</span>
+                    </div>
+                    <button
+                        type="button"
+                        className={style.imagePreviewRemoveBtn}
+                        onClick={() => { setImagePreview(null); setImagePreviewName(""); }}
+                        title="Remove image"
+                    >✕</button>
+                </div>
+            )}
             <form className={style.inputArea} onSubmit={handleSendWithReply}>
                 <button type="button" className={style.inputIconBtn} title="Attach">
                     <MdCalendarToday size={20} color="#888" />
                 </button>
+                <button
+                    type="button"
+                    className={style.inputIconBtn}
+                    title="Add image"
+                    onClick={handleImageIconClick}
+                    style={{ marginRight: 4 }}
+                >
+                    <FiImage size={20} color="#888" />
+                </button>
+                <button
+                    type="button"
+                    className={style.inputIconBtn}
+                    title="Add file"
+                    onClick={handleFileIconClick}
+                >
+                    <FiFile size={20} color="#888" />
+                </button>
+                <input
+                    type="file"
+                    ref={imageInputRef}
+                    style={{ display: 'none' }}
+                    accept=".jpg,.jpeg,.png,.gif,.webp,image/*"
+                    onChange={handleImageChange}
+                />
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,application/zip,application/x-rar-compressed"
+                    onChange={handleFileChange}
+                />
                 <input
                     type="text"
                     className={style.inputBox}
@@ -227,6 +346,29 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                             className={style.cancelForwardBtn}
                             onClick={() => setShowForwardModal(false)}
                         >Cancel</button>
+                    </div>
+                </div>
+            )}
+
+            {fullscreenImage && (
+                <div
+                    className={style.fullscreenImageOverlay}
+                    onClick={closeFullscreenImage}
+                >
+                    <div className={style.fullscreenImageContainer}>
+                        <img
+                            src={fullscreenImage}
+                            alt="Fullscreen"
+                            className={style.fullscreenImage}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            className={style.fullscreenCloseBtn}
+                            onClick={closeFullscreenImage}
+                            style={{ background: 'none' }}
+                        >
+                            ✕
+                        </button>
                     </div>
                 </div>
             )}

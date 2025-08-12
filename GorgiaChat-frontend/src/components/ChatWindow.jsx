@@ -19,7 +19,6 @@ const ChatWindow = () => {
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState(new Set());
-    const [replyTo, setReplyTo] = useState(null);
     const socketRef = useRef(null)
     const navigate = useNavigate()
 
@@ -37,7 +36,6 @@ const ChatWindow = () => {
                 if (response.data.contacts) {
                     const contacts = response.data.contacts;
                     setChatList(contacts);
-                    // Store in localStorage for call context to use
                     localStorage.setItem('chatList', JSON.stringify(contacts));
                 }
             } catch (error) {
@@ -51,15 +49,13 @@ const ChatWindow = () => {
     useEffect(() => {
         socketRef.current = io('http://localhost:3000')
 
-        // Register user immediately on connection
         socketRef.current.on('connect', () => {
             setMyId(socketRef.current.id)
 
-            // Register user with socket for call functionality
             if (user?.id) {
                 console.log("Registering user with socket:", user);
                 socketRef.current.emit('user-connected', {
-                    userId: parseInt(user.id),  // Ensure integer
+                    userId: parseInt(user.id),
                     userInfo: {
                         id: user.id,
                         username: user.username,
@@ -116,13 +112,11 @@ const ChatWindow = () => {
             }
         })
 
-        // Handle initial online users list
         socketRef.current.on('online-users', (userIds) => {
             console.log('Received online users:', userIds);
             setOnlineUsers(new Set(userIds));
         });
 
-        // Handle user status changes
         socketRef.current.on('user-status-change', ({ userId, isOnline }) => {
             console.log(`User ${userId} is now ${isOnline ? 'online' : 'offline'}`);
             setOnlineUsers(prev => {
@@ -166,42 +160,87 @@ const ChatWindow = () => {
                         id: msg.parent_message_id,
                         text: msgMap[msg.parent_message_id]?.text || '',
                         fromMe: msgMap[msg.parent_message_id]?.sender_id === user.id
-                    } : null
+                    } : null,
+                    // Добавляем URL изображения в свойство image
+                    image: msg.image_url ? `http://localhost:3000${msg.image_url}` : null
                 }))
                 setMessages(msgs)
             } catch (err) {
+                console.error("Error fetching messages:", err);
                 setMessages([])
             }
         }
         fetchMessages()
     }, [selectedChat?.id, user?.id])
 
-    const handleSend = async (e, replyMsg) => {
-        e.preventDefault()
-        if (!input.trim() || !myId || !user?.id || !selectedChat?.id) return
-        const now = Date.now()
-        const msg = {
-            id: now,
-            text: input,
-            senderId: myId,
-            senderDbId: user.id,
-            receiverDbId: selectedChat.id,
-            time: now,
-            replyTo: replyMsg ? {
-                id: replyMsg.id,
-                text: replyMsg.text,
-                fromMe: replyMsg.fromMe
-            } : null,
-            parentMessageId: replyMsg ? replyMsg.id : null
+    const base64ToBlob = (base64String, contentType) => {
+        const byteCharacters = atob(base64String.split(',')[1]);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
         }
+
+        return new Blob(byteArrays, { type: contentType || 'image/jpeg' });
+    };
+
+    const handleSend = async (messageData) => {
+        if (!myId || !user?.id || !selectedChat?.id) return;
+        if (!messageData.text && !messageData.image) return;
+
+        const now = Date.now();
+        let imageUrl = null;
+
         try {
+            if (messageData.image) {
+                const formData = new FormData();
+                const imageBlob = base64ToBlob(messageData.image);
+                formData.append('image', imageBlob, messageData.imageName || 'image.jpg');
+
+                const uploadResponse = await defaultInstance.post('/user/upload-image', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                imageUrl = uploadResponse.data.imageUrl;
+            }
+
+            const msg = {
+                id: now,
+                text: messageData.text || "",
+                senderId: myId,
+                senderDbId: user.id,
+                receiverDbId: selectedChat.id,
+                time: now,
+                replyTo: messageData.replyTo ? {
+                    id: messageData.replyTo.id,
+                    text: messageData.replyTo.text,
+                    fromMe: messageData.replyTo.fromMe
+                } : null,
+                parentMessageId: messageData.replyTo ? messageData.replyTo.id : null,
+                image: messageData.image,
+                imageUrl: imageUrl
+            };
+
             await defaultInstance.post('/user/messages/send', {
                 senderId: user.id,
                 receiverId: selectedChat.id,
-                text: input,
+                text: messageData.text || "",
                 time: now,
-                parentMessageId: replyMsg ? replyMsg.id : null
-            })
+                parentMessageId: messageData.replyTo ? messageData.replyTo.id : null,
+                imageUrl: imageUrl
+            });
+
+            socketRef.current.emit('send-message', msg);
 
             const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
             if (response.data.contacts) {
@@ -210,10 +249,7 @@ const ChatWindow = () => {
         } catch (err) {
             console.error("Failed to send message:", err);
         }
-
-        socketRef.current.emit('send-message', msg)
-        setInput('')
-    }
+    };
 
     const handleSelectChat = chat => {
         setSelectedChat(chat)
@@ -253,7 +289,6 @@ const ChatWindow = () => {
         socketRef.current.emit('send-message', forwardMsg);
     }
 
-    // Add online status to chat list and selected chat
     const chatListWithStatus = chatList.map(chat => ({
         ...chat,
         isOnline: onlineUsers.has(chat.id)

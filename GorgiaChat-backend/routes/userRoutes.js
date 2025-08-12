@@ -3,6 +3,39 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, '..', 'storage', 'images');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Только изображения разрешены!'), false);
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 router.post('/register', async (req, res) => {
     try {
@@ -76,15 +109,32 @@ router.get('/search-user', async (req, res) => {
     }
 });
 
+// Роут для загрузки изображений
+router.post('/upload-image', upload.single('image'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Файл не загружен' });
+        }
+
+        const imageUrl = `/images/${req.file.filename}`;
+        res.json({ imageUrl });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Ошибка при загрузке файла' });
+    }
+});
+
 router.post('/messages/send', async (req, res) => {
-    const { senderId, receiverId, text, time, parentMessageId, forwarded } = req.body;
-    if (!senderId || !receiverId || !text || !time) {
+    const { senderId, receiverId, text, time, parentMessageId, forwarded, imageUrl } = req.body;
+
+    if (!senderId || !receiverId || (!text && !imageUrl) || !time) {
         return res.status(400).json({ error: 'Missing fields' });
     }
+
     try {
         await pool.query(
-            'INSERT INTO messages (sender_id, receiver_id, text, time, parent_message_id, forwarded) VALUES (?, ?, ?, ?, ?, ?)',
-            [senderId, receiverId, text, time, parentMessageId || null, forwarded ? 1 : 0]
+            'INSERT INTO messages (sender_id, receiver_id, text, time, parent_message_id, forwarded, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [senderId, receiverId, text, time, parentMessageId || null, forwarded ? 1 : 0, imageUrl || null]
         );
         res.json({ success: true });
     } catch (error) {
@@ -93,6 +143,7 @@ router.post('/messages/send', async (req, res) => {
     }
 });
 
+// Обновление роута получения сообщений для включения URL изображений
 router.get('/messages/:userId/:otherUserId', async (req, res) => {
     const { userId, otherUserId } = req.params;
     try {
