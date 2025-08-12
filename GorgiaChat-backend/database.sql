@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS messages (
   parent_message_id INT DEFAULT NULL,
   forwarded TINYINT(1) DEFAULT 0,
   image_url TEXT DEFAULT NULL,
+  file_url TEXT DEFAULT NULL,
   FOREIGN KEY (sender_id) REFERENCES users(id),
   FOREIGN KEY (receiver_id) REFERENCES users(id),
   FOREIGN KEY (parent_message_id) REFERENCES messages(id)
