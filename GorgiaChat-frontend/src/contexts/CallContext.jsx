@@ -15,6 +15,9 @@ export const CallProvider = ({ children }) => {
         receiver: null,
         callRejected: false,
     });
+    const [callTimer, setCallTimer] = useState(0);
+    const timerIntervalRef = useRef(null);
+    const [lastCallDuration, setLastCallDuration] = useState(null);
 
     const user = useSelector(state => state.auth.user);
     const socketRef = useRef();
@@ -90,6 +93,8 @@ export const CallProvider = ({ children }) => {
             try {
                 const remoteDesc = new RTCSessionDescription(answer);
                 await peerConnectionRef.current.connection.setRemoteDescription(remoteDesc);
+                // Start timer for caller when call is accepted
+                startTimer();
             } catch (error) {
                 console.error("Error setting remote description:", error);
             }
@@ -134,6 +139,25 @@ export const CallProvider = ({ children }) => {
             socketRef.current?.disconnect();
         };
     }, [user?.id]);
+
+    // Start timer
+    const startTimer = () => {
+        setCallTimer(0);
+        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = setInterval(() => {
+            setCallTimer(prev => prev + 1);
+        }, 1000);
+    };
+
+    // Stop timer and save duration
+    const stopTimer = () => {
+        if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+        }
+        setLastCallDuration(callTimer);
+        setCallTimer(0);
+    };
 
     const initiateCall = async (receiverId, withVideo = false) => {
         console.log(`Initiating ${withVideo ? 'video' : 'audio'} call to user ${receiverId}`);
@@ -326,6 +350,8 @@ export const CallProvider = ({ children }) => {
                 isVideoCall: isVideo,
                 caller: from
             }));
+            // Start timer for receiver when call is accepted
+            startTimer();
         } catch (error) {
             console.error("Error accepting call:", error);
             rejectCall();
@@ -352,11 +378,10 @@ export const CallProvider = ({ children }) => {
 
     const endCall = () => {
         const { to } = peerConnectionRef.current || {};
-
         if (to) {
-            socketRef.current.emit('end-call', { to });
+            socketRef.current.emit('end-call', { to, duration: callTimer });
         }
-
+        stopTimer();
         cleanupCall();
     };
 
@@ -446,7 +471,9 @@ export const CallProvider = ({ children }) => {
             toggleVideo,
             setAudioRef,
             setVideoRefs,
-            dismissRejection: () => setCallState(prev => ({ ...prev, callRejected: false }))
+            dismissRejection: () => setCallState(prev => ({ ...prev, callRejected: false })),
+            callTimer,
+            lastCallDuration
         }}>
             {children}
         </CallContext.Provider>

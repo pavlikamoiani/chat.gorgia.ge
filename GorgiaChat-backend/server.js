@@ -19,7 +19,6 @@ app.use(cors({
     credentials: false
 }));
 app.use(express.json());
-// Убедимся, что правильный путь используется для обслуживания изображений
 app.use('/images', express.static(path.join(__dirname, 'storage', 'images')));
 
 // Routes
@@ -31,12 +30,10 @@ app.use('/api/register', registerRoute);
 app.use('/api/login', loginRoute);
 app.use('/api/user', userRoutes);
 
-// Fallback route
 app.use('/api', (req, res) => {
     res.status(404).json({ error: 'API route not found' });
 });
 
-// Socket.io
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
@@ -194,7 +191,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

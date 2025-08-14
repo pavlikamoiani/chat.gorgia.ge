@@ -4,7 +4,7 @@ import { useCall } from '../../contexts/CallContext';
 import styles from '../../assets/css/CallModal.module.css';
 
 const CallModal = () => {
-    const { callState, endCall, toggleMute, toggleVideo, setAudioRef, setVideoRefs } = useCall();
+    const { callState, endCall, toggleMute, toggleVideo, setAudioRef, setVideoRefs, callTimer } = useCall();
     const { isCallActive, isMuted, isVideoEnabled, isVideoCall, caller, receiver } = callState;
     const [displayName, setDisplayName] = useState('');
     const [displayAvatar, setDisplayAvatar] = useState('?');
@@ -65,6 +65,13 @@ const CallModal = () => {
         };
     }, [endCall]);
 
+    // Format timer as mm:ss
+    const formatTimer = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
     if (!isCallActive) return null;
 
     return (
@@ -114,10 +121,18 @@ const CallModal = () => {
                             {displayName}
                         </div>
                         <div className={styles.callStatus}>
-                            Call in progress...
+                            {callTimer > 0
+                                ? `Call duration: ${formatTimer(callTimer)}`
+                                : `Call in progress...`}
                         </div>
                     </div>
                 )}
+                {/* 
+                {isCallActive && (
+                    <div className={styles.callTimer}>
+                        Call duration: {formatTimer(callTimer)}
+                    </div>
+                )} */}
 
                 <div className={styles.callControls}>
                     <button

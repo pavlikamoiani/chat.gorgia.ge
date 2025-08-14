@@ -10,7 +10,7 @@ import MessagesArea from './MessagesArea'
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
-    const { initiateCall } = useCall();
+    const { initiateCall, lastCallDuration } = useCall();
     const [replyTo, setReplyTo] = useState(null);
     const [forwardMsg, setForwardMsg] = useState(null);
     const [showForwardModal, setShowForwardModal] = useState(false);
@@ -334,6 +334,12 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                             ✕
                         </button>
                     </div>
+                </div>
+            )}
+            {/* Show last call duration if available */}
+            {lastCallDuration !== null && (
+                <div className={style.lastCallDuration}>
+                    Last call duration: {Math.floor(lastCallDuration / 60)}m {lastCallDuration % 60}s
                 </div>
             )}
         </main>
