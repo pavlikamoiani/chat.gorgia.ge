@@ -31,7 +31,10 @@ const ChatWindow = () => {
             try {
                 const response = await defaultInstance.get(`/user/chat-contacts/${user.id}`);
                 if (response.data.contacts) {
-                    const contacts = response.data.contacts;
+                    // Use lastMessageIsImage from backend
+                    const contacts = response.data.contacts.map(chat => ({
+                        ...chat
+                    }));
                     setChatList(contacts);
                     localStorage.setItem('chatList', JSON.stringify(contacts));
                 }
@@ -85,7 +88,8 @@ const ChatWindow = () => {
                             ...updatedChats[existingChatIndex],
                             lastMessage: msg.text,
                             lastMessageTime: msg.time || Date.now(),
-                            unread: !isChatOpen && msg.senderDbId !== user?.id
+                            unread: !isChatOpen && msg.senderDbId !== user?.id,
+                            lastMessageIsImage: !!msg.imageUrl // <-- set true if image
                         };
                         return updatedChats.sort((a, b) =>
                             (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
@@ -96,8 +100,7 @@ const ChatWindow = () => {
                             .then(response => {
                                 if (response.data.contacts) {
                                     setChatList(response.data.contacts.map(chat => ({
-                                        ...chat,
-                                        unread: !selectedChat || selectedChat.id !== chat.id
+                                        ...chat
                                     })));
                                 }
                             })

@@ -16,8 +16,7 @@ const MessagesArea = ({
     openFullscreenImage,
     handleReply,
     handleForward,
-    selectedChat,
-    usersById // <-- new prop for userId -> user mapping
+    usersById
 }) => (
     <div className={style.messagesArea} ref={messagesAreaRef}>
         {messages.length === 0 ? (
@@ -41,74 +40,75 @@ const MessagesArea = ({
                         {msg.fromMe
                             ? "You"
                             : (
-                                // Show sender name for group messages
                                 usersById && usersById[msg.senderId]
                                     ? usersById[msg.senderId].username
                                     : "Unknown"
                             )}
                     </div>
-                    <div
-                        className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
-                        style={{ position: 'relative' }}
-                    >
-                        <div className={style.msgHoverOverlay}>
+                    <div className={`${style.messageContainer} ${msg.fromMe ? style.messageContainerMe : style.messageContainerThem}`}>
+                        <div
+                            className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
+                            style={{ position: 'relative' }}
+                        >
+                            <div className={style.msgHoverOverlay}>
+                                <button
+                                    className={style.replyBtnTop}
+                                    title="Reply"
+                                    onClick={() => handleReply(msg)}
+                                >
+                                    <FaReply />
+                                </button>
+                                <button
+                                    className={style.forwardBtnTop}
+                                    title="Forward"
+                                    onClick={() => handleForward(msg)}
+                                >
+                                    <FaShare />
+                                </button>
+                            </div>
+                            {/* Message content */}
+                            {msg.image && (
+                                <img
+                                    src={msg.image}
+                                    alt="img"
+                                    style={{
+                                        maxWidth: 180,
+                                        maxHeight: 180,
+                                        borderRadius: 8,
+                                        marginBottom: 6,
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => openFullscreenImage(msg.image)}
+                                    onError={(e) => {
+                                        console.error("Image failed to load:", e.target.src);
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            )}
+                            {msg.file && (
+                                <a
+                                    href={msg.file.url || msg.file}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={style.fileMessageLink}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        marginBottom: 6
+                                    }}
+                                >
+                                    <FiFile size={20} />
+                                    <span>{msg.file.name || 'File'}</span>
+                                </a>
+                            )}
+                            <span>{msg.text}</span>
 
-                            <button
-                                className={style.replyBtnTop}
-                                title="Reply"
-                                onClick={() => handleReply(msg)}
-                            >
-                                <FaReply />
-                            </button>
-                            <button
-                                className={style.forwardBtnTop}
-                                title="Forward"
-                                onClick={() => handleForward(msg)}
-                            >
-                                <FaShare />
-                            </button>
+                            {/* Time stamp attached to the message bubble */}
+                            <span className={`${style.msgTimeOnHover} ${msg.fromMe ? style.timeRight : style.timeLeft}`}>
+                                {formatTime(msg.time)}
+                            </span>
                         </div>
-                        {/* Message content */}
-                        {msg.image && (
-                            <img
-                                src={msg.image}
-                                alt="img"
-                                style={{
-                                    maxWidth: 180,
-                                    maxHeight: 180,
-                                    borderRadius: 8,
-                                    marginBottom: 6,
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => openFullscreenImage(msg.image)}
-                                onError={(e) => {
-                                    console.error("Image failed to load:", e.target.src);
-                                    e.target.style.display = 'none';
-                                }}
-                            />
-                        )}
-                        {msg.file && (
-                            <a
-                                href={msg.file.url || msg.file}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={style.fileMessageLink}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 8,
-                                    marginBottom: 6
-                                }}
-                            >
-                                <FiFile size={20} />
-                                <span>{msg.file.name || 'File'}</span>
-                            </a>
-                        )}
-                        <span>{msg.text}</span>
-                        {/* Date/time on hover */}
-                        <span className={style.msgTimeOnHover}>
-                            {formatTime(msg.time)}
-                        </span>
                     </div>
                 </div>
             ))

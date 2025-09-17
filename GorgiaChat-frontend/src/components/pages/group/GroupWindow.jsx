@@ -70,7 +70,13 @@ const GroupWindow = () => {
                 const res = await defaultInstance.get("/user/group/list", {
                     params: { userId: user?.id }
                 });
-                setGroupList(res.data.groups || []);
+                // Map backend fields to ChatListPanel fields
+                setGroupList((res.data.groups || []).map(g => ({
+                    ...g,
+                    lastMessage: g.lastMessage || "",
+                    lastMessageTime: g.lastMessageTime || null,
+                    lastMessageIsImage: g.lastMessageIsImage || false
+                })));
             } catch {
                 setGroupList([]);
             }

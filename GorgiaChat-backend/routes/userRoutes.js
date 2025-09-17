@@ -176,14 +176,21 @@ router.get('/chat-contacts/:userId', async (req, res) => {
                 (SELECT m.time FROM messages m 
                  WHERE ((m.sender_id = ? AND m.receiver_id = u.id) OR 
                         (m.sender_id = u.id AND m.receiver_id = ?)) 
-                 ORDER BY m.time DESC LIMIT 1) as last_message_time
+                 ORDER BY m.time DESC LIMIT 1) as last_message_time,
+                (SELECT m.image_url FROM messages m 
+                 WHERE ((m.sender_id = ? AND m.receiver_id = u.id) OR 
+                        (m.sender_id = u.id AND m.receiver_id = ?)) 
+                 ORDER BY m.time DESC LIMIT 1) as last_message_image_url
              FROM users u
              INNER JOIN messages m 
              ON (m.sender_id = ? AND m.receiver_id = u.id) OR 
                 (m.sender_id = u.id AND m.receiver_id = ?)
              WHERE u.id <> ?
              ORDER BY last_message_time DESC`,
-            [userId, userId, userId, userId, userId, userId, userId]
+            [
+                userId, userId, userId, userId,
+                userId, userId, userId, userId, userId
+            ]
         );
 
         res.json({
@@ -192,7 +199,8 @@ router.get('/chat-contacts/:userId', async (req, res) => {
                 name: contact.username,
                 email: contact.email,
                 lastMessage: contact.last_message,
-                lastMessageTime: contact.last_message_time
+                lastMessageTime: contact.last_message_time,
+                lastMessageIsImage: !!contact.last_message_image_url // <-- add this
             }))
         });
     } catch (error) {
@@ -237,12 +245,43 @@ router.get('/group/list', async (req, res) => {
              WHERE gm.user_id = ?`,
             [userId]
         );
+
+        // For each group, get last message and time, and if it's an image
+        const groupIds = groups.map(g => g.id);
+        let lastMessages = [];
+        if (groupIds.length > 0) {
+            const [rows] = await pool.query(
+                `SELECT t1.group_id, t1.text as last_message, t1.time as last_message_time, t1.image_url
+                 FROM group_messages t1
+                 INNER JOIN (
+                    SELECT group_id, MAX(time) as max_time
+                    FROM group_messages
+                    WHERE group_id IN (${groupIds.map(() => '?').join(',')})
+                    GROUP BY group_id
+                 ) t2 ON t1.group_id = t2.group_id AND t1.time = t2.max_time`,
+                groupIds
+            );
+            lastMessages = rows;
+        }
+        // Map groupId -> last message/time/isImage
+        const lastMsgMap = {};
+        lastMessages.forEach(row => {
+            lastMsgMap[row.group_id] = {
+                lastMessage: row.last_message,
+                lastMessageTime: row.last_message_time,
+                lastMessageIsImage: !!row.image_url
+            };
+        });
+
         res.json({
             groups: groups.map(g => ({
                 id: g.id,
                 name: g.name,
                 creatorId: g.creator_id,
-                createdAt: g.created_at
+                createdAt: g.created_at,
+                lastMessage: lastMsgMap[g.id]?.lastMessage || "",
+                lastMessageTime: lastMsgMap[g.id]?.lastMessageTime || null,
+                lastMessageIsImage: lastMsgMap[g.id]?.lastMessageIsImage || false
             }))
         });
     } catch (error) {
