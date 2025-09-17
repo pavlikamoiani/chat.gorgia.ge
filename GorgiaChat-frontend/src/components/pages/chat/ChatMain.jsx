@@ -8,7 +8,6 @@ import { FiImage } from 'react-icons/fi'
 import MessagesArea from './MessagesArea'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
-    const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
     const { initiateCall, lastCallDuration } = useCall();
     const [replyTo, setReplyTo] = useState(null);
@@ -140,7 +139,6 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
         setFullscreenImage(null);
     };
 
-    // Фильтрация сообщений по вкладке
     let filteredMessages = messages;
     if (activeTab === 'Photos') {
         filteredMessages = messages.filter(msg => !!msg.image);
@@ -207,7 +205,6 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                     </button>
                 </div>
             </header>
-            {/* Используем MessagesArea с фильтрованными сообщениями и активной вкладкой */}
             <MessagesArea
                 style={style}
                 messages={filteredMessages}
@@ -336,7 +333,6 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                     </div>
                 </div>
             )}
-            {/* Show last call duration if available */}
             {lastCallDuration !== null && (
                 <div className={style.lastCallDuration}>
                     Last call duration: {Math.floor(lastCallDuration / 60)}m {lastCallDuration % 60}s

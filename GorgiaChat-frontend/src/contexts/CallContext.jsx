@@ -140,7 +140,6 @@ export const CallProvider = ({ children }) => {
         };
     }, [user?.id]);
 
-    // Start timer
     const startTimer = () => {
         setCallTimer(0);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -149,7 +148,6 @@ export const CallProvider = ({ children }) => {
         }, 1000);
     };
 
-    // Stop timer and save duration
     const stopTimer = () => {
         if (timerIntervalRef.current) {
             clearInterval(timerIntervalRef.current);
@@ -163,13 +161,11 @@ export const CallProvider = ({ children }) => {
         console.log(`Initiating ${withVideo ? 'video' : 'audio'} call to user ${receiverId}`);
 
         try {
-            // Check if browser supports getUserMedia
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert("Your browser doesn't support media devices. Please use a modern browser.");
                 return;
             }
 
-            // Request media with proper constraints
             console.log("Requesting media access:", { audio: true, video: withVideo });
 
             try {
@@ -341,7 +337,6 @@ export const CallProvider = ({ children }) => {
             if (localVideoRef.current && isVideo) {
                 localVideoRef.current.srcObject = localStreamRef.current;
             }
-
             setCallState(prev => ({
                 ...prev,
                 isReceivingCall: false,
@@ -350,7 +345,6 @@ export const CallProvider = ({ children }) => {
                 isVideoCall: isVideo,
                 caller: from
             }));
-            // Start timer for receiver when call is accepted
             startTimer();
         } catch (error) {
             console.error("Error accepting call:", error);

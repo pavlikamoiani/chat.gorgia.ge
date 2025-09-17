@@ -65,7 +65,6 @@ const CallModal = () => {
         };
     }, [endCall]);
 
-    // Format timer as mm:ss
     const formatTimer = (seconds) => {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
