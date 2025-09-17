@@ -284,4 +284,22 @@ router.get('/group/messages/:groupId', async (req, res) => {
     }
 });
 
+// Get group members (for showing sender names in group chat)
+router.get('/group/members/:groupId', async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        const [members] = await pool.query(
+            `SELECT u.id, u.username, u.email
+             FROM group_members gm
+             JOIN users u ON gm.user_id = u.id
+             WHERE gm.group_id = ?`,
+            [groupId]
+        );
+        res.json({ members });
+    } catch (error) {
+        console.error('Fetch group members error:', error);
+        res.status(500).json({ error: 'Server error during fetch group members' });
+    }
+});
+
 module.exports = router;

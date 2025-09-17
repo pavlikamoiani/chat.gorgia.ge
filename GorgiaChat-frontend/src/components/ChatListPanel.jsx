@@ -164,7 +164,7 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
             <div className={style.chatList}>
                 {chatList.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
-                        {isGroupList ? "No groups yet" : "No conversations yet"}
+                        {isGroupList ? "ჯგუფები არ მოიძებნა" : "ჩატი არ მოიძებნა"}
                     </div>
                 ) : (
                     chatList.map(chat => (

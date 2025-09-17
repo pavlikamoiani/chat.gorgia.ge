@@ -2,6 +2,12 @@ import React from 'react'
 import { FaReply, FaShare } from 'react-icons/fa'
 import { FiFile } from 'react-icons/fi'
 
+const formatTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 const MessagesArea = ({
     style,
     messages,
@@ -10,7 +16,8 @@ const MessagesArea = ({
     openFullscreenImage,
     handleReply,
     handleForward,
-    selectedChat // Add selectedChat to props
+    selectedChat,
+    usersById // <-- new prop for userId -> user mapping
 }) => (
     <div className={style.messagesArea} ref={messagesAreaRef}>
         {messages.length === 0 ? (
@@ -23,8 +30,7 @@ const MessagesArea = ({
             </div>
         ) : (
             messages.map(msg => (
-                <div key={msg.id}>
-                    {/* Sender's name above the message bubble */}
+                <div key={msg.id} style={{ position: 'relative' }}>
                     <div
                         className={
                             msg.fromMe
@@ -34,7 +40,12 @@ const MessagesArea = ({
                     >
                         {msg.fromMe
                             ? "You"
-                            : (selectedChat && selectedChat.name ? selectedChat.name : "Unknown")}
+                            : (
+                                // Show sender name for group messages
+                                usersById && usersById[msg.senderId]
+                                    ? usersById[msg.senderId].username
+                                    : "Unknown"
+                            )}
                     </div>
                     <div
                         className={msg.fromMe ? style.msgFromMe : style.msgFromThem}
@@ -94,6 +105,10 @@ const MessagesArea = ({
                             </a>
                         )}
                         <span>{msg.text}</span>
+                        {/* Date/time on hover */}
+                        <span className={style.msgTimeOnHover}>
+                            {formatTime(msg.time)}
+                        </span>
                     </div>
                 </div>
             ))

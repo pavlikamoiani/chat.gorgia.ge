@@ -7,7 +7,7 @@ import { useCall } from '../../../contexts/CallContext'
 import { FiImage } from 'react-icons/fi'
 import MessagesArea from './MessagesArea'
 
-const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward }) => {
+const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward, usersById }) => {
     const messagesAreaRef = useRef(null);
     const { initiateCall, lastCallDuration } = useCall();
     const [replyTo, setReplyTo] = useState(null);
@@ -214,6 +214,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                 handleReply={handleReply}
                 handleForward={handleForward}
                 selectedChat={selectedChat}
+                usersById={usersById}
             />
             {replyTo && (
                 <div className={style.replyPreview}>

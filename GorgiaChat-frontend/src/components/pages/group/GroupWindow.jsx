@@ -13,6 +13,8 @@ const GroupWindow = () => {
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
+    const [groupMembers, setGroupMembers] = useState([]);
+    const [usersById, setUsersById] = useState({});
     const user = useSelector(state => state.auth.user);
     const socketRef = useRef(null);
     const selectedGroupRef = useRef(null);
@@ -75,6 +77,25 @@ const GroupWindow = () => {
         };
         fetchGroups();
     }, [user?.id, showCreateModal]);
+
+    useEffect(() => {
+        if (!selectedGroup) return;
+        // Fetch group members for the selected group
+        const fetchGroupMembers = async () => {
+            try {
+                const res = await defaultInstance.get(`/user/group/members/${selectedGroup.id}`);
+                setGroupMembers(res.data.members || []);
+                // Build userId -> user map
+                const map = {};
+                (res.data.members || []).forEach(u => { map[u.id] = u; });
+                setUsersById(map);
+            } catch {
+                setGroupMembers([]);
+                setUsersById({});
+            }
+        };
+        fetchGroupMembers();
+    }, [selectedGroup]);
 
     useEffect(() => {
         if (!selectedGroup) return;
@@ -205,14 +226,15 @@ const GroupWindow = () => {
                     input={input}
                     setInput={setInput}
                     messages={messages}
-                    onSend={handleSend}
                     chatList={groupList}
+                    onSend={handleSend}
                     onForward={() => { }}
+                    usersById={usersById} // <-- pass usersById to ChatMain
                 />
             ) : (
                 <div className={style.chatMain} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ textAlign: 'center', color: '#888', fontSize: '1.3rem' }}>
-                        Select a group.
+                        არჩიეთ ჯგუფი ან შექმენით ახალი ჯგუფი
                     </div>
                 </div>
             )}
