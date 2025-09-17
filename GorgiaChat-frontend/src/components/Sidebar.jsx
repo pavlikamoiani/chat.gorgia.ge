@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import logo from '/logo.jpg'
 import style from '../assets/css/ChatWindow.module.css'
 import { MdChatBubble, MdCalendarToday, MdNotifications } from 'react-icons/md'
+import { HiUserGroup } from "react-icons/hi2";
 import { FiVideo } from 'react-icons/fi'
 import { GiHamburgerMenu } from 'react-icons/gi'
 import { useDispatch } from "react-redux";
@@ -9,9 +10,10 @@ import { logout as logoutAction } from "../store/authSlice";
 
 export const sidebarIcons = [
     { name: 'Chat', icon: MdChatBubble, route: '/chat' },
-    { name: 'Meet', icon: FiVideo, route: '/meet' },
-    { name: 'Calendar', icon: MdCalendarToday, route: '/calendar' },
-    { name: 'Activity', icon: MdNotifications, route: '/activity' },
+    { name: 'Group', icon: HiUserGroup, route: '/group' },
+    // { name: 'Meet', icon: FiVideo, route: '/meet' },
+    // { name: 'Calendar', icon: MdCalendarToday, route: '/calendar' },
+    // { name: 'Activity', icon: MdNotifications, route: '/activity' },
 ]
 
 const Sidebar = ({ active, setActive, onLogoClick, onProfile, onLogout }) => {

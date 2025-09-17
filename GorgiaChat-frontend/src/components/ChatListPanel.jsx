@@ -3,6 +3,7 @@ import { MdChatBubble } from 'react-icons/md'
 import { FaUserPlus } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
 import defaultInstance from '../api/defaultInstance'
+import { IoSearch } from "react-icons/io5";
 
 const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChatList }) => {
     const [search, setSearch] = useState('')
@@ -64,7 +65,7 @@ const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChat
                 </button>
             </div>
             <div className={style.searchBar} style={{ position: 'relative' }}>
-                <MdChatBubble size={20} color="#888" />
+                <IoSearch size={20} color="#888" />
                 <input
                     type="text"
                     placeholder="Search users"

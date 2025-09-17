@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import style from '../assets/css/ChatWindow.module.css'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
-import Sidebar, { sidebarIcons } from './Sidebar'
 import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
-import logo from '/logo.jpg'
 import { useSelector } from 'react-redux'
 import defaultInstance from '../api/defaultInstance'
 
@@ -15,7 +13,6 @@ const ChatWindow = () => {
     const [input, setInput] = useState('')
     const [chatList, setChatList] = useState([])
     const [selectedChat, setSelectedChat] = useState(null)
-    const [activeSidebar, setActiveSidebar] = useState(0)
     const [messages, setMessages] = useState([])
     const [myId, setMyId] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState(new Set());
@@ -300,18 +297,7 @@ const ChatWindow = () => {
     } : null;
 
     return (
-        <div className={style.appBg}>
-            <Sidebar
-                active={activeSidebar}
-                setActive={idx => {
-                    setActiveSidebar(idx)
-                    const item = sidebarIcons[idx]
-                    if (item.route && item.route !== '#') navigate(item.route)
-                }}
-                sidebarIcons={sidebarIcons}
-                logo={logo}
-                onLogoClick={() => window.location.reload()}
-            />
+        <>
             <ChatListPanel
                 style={style}
                 chatList={chatListWithStatus}
@@ -337,7 +323,7 @@ const ChatWindow = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     )
 }
 

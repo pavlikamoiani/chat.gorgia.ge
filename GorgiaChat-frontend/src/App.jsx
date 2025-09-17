@@ -9,6 +9,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CallModal from './components/call/CallModal';
 import IncomingCallModal from './components/call/IncomingCallModal';
 import RejectionModal from './components/call/RejectionModal';
+import Group from './components/pages/group/GroupWindow';
+import Layout from './components/Layout'; // new import
 import './App.css';
 
 function App() {
@@ -18,37 +20,19 @@ function App() {
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
         <Route
-          path="/chat"
+          path="/"
           element={
             <ProtectedRoute>
-              <ChatWindow />
+              <Layout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/meet"
-          element={
-            <ProtectedRoute>
-              <MeetWindow />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/calendar"
-          element={
-            <ProtectedRoute>
-              <Calendar />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/activity"
-          element={
-            <ProtectedRoute>
-              <Activity />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/chat" element={<ChatWindow />} />
+          <Route path="/group" element={<Group />} />
+          <Route path="meet" element={<MeetWindow />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="activity" element={<Activity />} />
+        </Route>
       </Routes>
       <CallModal />
       <IncomingCallModal />
