@@ -28,3 +28,38 @@ CREATE TABLE IF NOT EXISTS messages (
   FOREIGN KEY (receiver_id) REFERENCES users(id),
   FOREIGN KEY (parent_message_id) REFERENCES messages(id)
 );
+
+-- Create groups table
+CREATE TABLE IF NOT EXISTS groups (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  creator_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (creator_id) REFERENCES users(id)
+);
+
+-- Create group_members table
+CREATE TABLE IF NOT EXISTS group_members (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  group_id INT NOT NULL,
+  user_id INT NOT NULL,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Create group_messages table
+CREATE TABLE IF NOT EXISTS group_messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  group_id INT NOT NULL,
+  sender_id INT NOT NULL,
+  text TEXT,
+  time BIGINT NOT NULL,
+  parent_message_id INT DEFAULT NULL,
+  forwarded TINYINT(1) DEFAULT 0,
+  image_url TEXT DEFAULT NULL,
+  file_url TEXT DEFAULT NULL,
+  FOREIGN KEY (group_id) REFERENCES groups(id),
+  FOREIGN KEY (sender_id) REFERENCES users(id),
+  FOREIGN KEY (parent_message_id) REFERENCES group_messages(id)
+);

@@ -1,0 +1,143 @@
+:root {
+    --primary-color: #0173b1;
+    --primary-light: #00c6fb;
+    --modal-bg: linear-gradient(135deg, #232a34 60%, #1a1f29 100%);
+    --modal-radius: 18px;
+    --modal-padding: 40px 32px 32px 32px;
+    --input-bg: #181e29;
+    --input-border: #374151;
+    --input-radius: 8px;
+    --input-focus: #0173b1;
+    --btn-radius: 8px;
+    --btn-gradient: linear-gradient(90deg, #0173b1 60%, #00c6fb 100%);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modalOverlayFadeIn 0.25s;
+    backdrop-filter: blur(2px);
+}
+
+@keyframes modalOverlayFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modalBox {
+    padding: var(--modal-padding);
+    border-radius: var(--modal-radius);
+    min-width: 340px;
+    color: #fff;
+    box-shadow: var(--modal-shadow);
+    position: relative;
+    animation: modalBoxShow 0.25s cubic-bezier(.4, 1.6, .6, 1);
+    border: 1.5px solid #2d3748;
+    max-width: 95vw;
+}
+
+@keyframes modalBoxShow {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.closeBtn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: rgba(30, 41, 59, 0.7);
+    border: none;
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: background 0.18s;
+}
+
+.closeBtn:hover {
+    background: #0173b1;
+    color: #fff;
+}
+
+.modalLabel {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 1.08em;
+    font-weight: 500;
+    color: #e2e8f0;
+    letter-spacing: 0.01em;
+}
+
+.modalInput {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: var(--input-radius);
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
+    color: #fff;
+    font-size: 17px;
+    margin-bottom: 22px;
+    outline: none;
+    transition: border 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.10);
+}
+
+.modalInput:focus {
+    border: 1.5px solid var(--input-focus);
+    box-shadow: 0 0 0 2px #0173b133;
+}
+
+.modalSubmitBtn {
+    width: 100%;
+    padding: 12px 0;
+    border-radius: var(--btn-radius);
+    border: none;
+    background: var(--btn-gradient);
+    color: #fff;
+    font-weight: 600;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: var(--btn-shadow);
+    letter-spacing: 0.02em;
+    transition: background 0.18s, box-shadow 0.18s, opacity 0.18s;
+}
+
+.modalSubmitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #374151;
+    box-shadow: none;
+}
+
+@media (max-width: 640px) {
+    .modalBox {
+        padding: 24px;
+        min-width: 0;
+    }
+}

@@ -28,7 +28,7 @@ const userRoutes = require('./routes/userRoutes');
 
 app.use('/api/register', registerRoute);
 app.use('/api/login', loginRoute);
-app.use('/api/user', userRoutes);
+app.use('/api/user', userRoutes); // <-- this is correct
 
 app.use('/api', (req, res) => {
     res.status(404).json({ error: 'API route not found' });

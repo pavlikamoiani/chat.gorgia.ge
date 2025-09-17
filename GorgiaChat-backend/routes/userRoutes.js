@@ -1,3 +1,5 @@
+console.log("userRoutes.js loaded");
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -196,6 +198,89 @@ router.get('/chat-contacts/:userId', async (req, res) => {
     } catch (error) {
         console.error('Fetch chat contacts error:', error);
         res.status(500).json({ error: 'Server error while fetching chat contacts' });
+    }
+});
+
+// Create a group
+router.post('/group/create', async (req, res) => {
+    const { name, userIds, creatorId } = req.body;
+    if (!name || !userIds || !Array.isArray(userIds) || !creatorId) {
+        return res.status(400).json({ error: 'Missing fields' });
+    }
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO groups (name, creator_id) VALUES (?, ?)',
+            [name, creatorId]
+        );
+        const groupId = result.insertId;
+        // Add creator and members
+        const memberIds = Array.from(new Set([creatorId, ...userIds]));
+        await Promise.all(memberIds.map(uid =>
+            pool.query('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)', [groupId, uid])
+        ));
+        res.json({ success: true, groupId });
+    } catch (error) {
+        console.error('Create group error:', error);
+        res.status(500).json({ error: 'Server error during group creation' });
+    }
+});
+
+// List groups for a user
+router.get('/group/list', async (req, res) => {
+    const userId = req.query.userId || req.headers['x-user-id'];
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
+    try {
+        const [groups] = await pool.query(
+            `SELECT g.id, g.name, g.creator_id, g.created_at
+             FROM groups g
+             JOIN group_members gm ON gm.group_id = g.id
+             WHERE gm.user_id = ?`,
+            [userId]
+        );
+        res.json({
+            groups: groups.map(g => ({
+                id: g.id,
+                name: g.name,
+                creatorId: g.creator_id,
+                createdAt: g.created_at
+            }))
+        });
+    } catch (error) {
+        console.error('List groups error:', error);
+        res.status(500).json({ error: 'Server error during group list' });
+    }
+});
+
+// Send group message
+router.post('/group/send-message', async (req, res) => {
+    const { groupId, senderId, text, time, parentMessageId, forwarded, imageUrl } = req.body;
+    if (!groupId || !senderId || (!text && !imageUrl) || !time) {
+        return res.status(400).json({ error: 'Missing fields' });
+    }
+    try {
+        await pool.query(
+            'INSERT INTO group_messages (group_id, sender_id, text, time, parent_message_id, forwarded, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [groupId, senderId, text, time, parentMessageId || null, forwarded ? 1 : 0, imageUrl || null]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Send group message error:', error);
+        res.status(500).json({ error: 'Server error during group message send' });
+    }
+});
+
+// Get group messages
+router.get('/group/messages/:groupId', async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        const [messages] = await pool.query(
+            `SELECT * FROM group_messages WHERE group_id = ? ORDER BY time ASC`,
+            [groupId]
+        );
+        res.json({ messages });
+    } catch (error) {
+        console.error('Fetch group messages error:', error);
+        res.status(500).json({ error: 'Server error during fetch group messages' });
     }
 });
 
