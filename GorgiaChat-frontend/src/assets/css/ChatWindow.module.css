@@ -340,30 +340,6 @@
     scrollbar-color: #0173b1 #232323;
 }
 
-.msgFromMe {
-    align-self: flex-end;
-    background: #0173b1;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 18px 18px 4px 18px;
-    max-width: 60%;
-    font-size: 1rem;
-    word-break: break-word;
-    box-shadow: 0 2px 8px #0002;
-}
-
-.msgFromThem {
-    align-self: flex-start;
-    background: #232323;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 18px 18px 18px 4px;
-    max-width: 60%;
-    font-size: 1rem;
-    word-break: break-word;
-    box-shadow: 0 2px 8px #0002;
-}
-
 .inputArea {
     display: flex;
     align-items: center;
@@ -782,5 +758,118 @@
 
     to {
         opacity: 1;
+    }
+}
+
+.messageSenderMe {
+    text-align: left;
+    margin-left: 0;
+    margin-right: auto;
+    display: block;
+    color: #b0b0b0;
+    font-weight: 600;
+    font-size: 12px;
+    max-width: 220px;
+    word-break: break-word;
+    padding-left: 4px;
+}
+
+.messageSenderThem {
+    text-align: right;
+    margin-left: auto;
+    margin-right: 0;
+    display: block;
+    color: #b0b0b0;
+    font-weight: 600;
+    font-size: 12px;
+    max-width: 220px;
+    word-break: break-word;
+    padding-right: 4px;
+}
+
+.messageSenderAbove {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 2px;
+    max-width: 220px;
+    word-break: break-word;
+}
+
+.messageSenderLeft {
+    text-align: left;
+    margin-left: 0;
+    margin-right: auto;
+    display: block;
+    direction: ltr;
+}
+
+.messageSenderRight {
+    text-align: right;
+    margin-left: auto;
+    margin-right: 0;
+    display: block;
+    direction: ltr;
+}
+
+.msgFromMe {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #0173b1 0%, #009ee0 100%);
+    color: #fff;
+    border-radius: 18px 18px 18px 6px;
+    padding: 12px 18px;
+    margin: 4px 0 4px 0;
+    box-shadow: 0 2px 8px #0173b133;
+    position: relative;
+    font-size: 1.04rem;
+    word-break: break-word;
+    transition: background 0.2s;
+    margin-left: 0;
+    margin-right: auto;
+    width: fit-content;
+    max-width: 420px;
+    min-width: 0;
+}
+
+.msgFromMe:hover {
+    background: linear-gradient(135deg, #009ee0 0%, #0173b1 100%);
+}
+
+.msgFromThem {
+    align-self: flex-end;
+    background: #232323;
+    color: #fff;
+    border-radius: 18px 18px 6px 18px;
+    padding: 12px 18px;
+    margin: 4px 0 4px 0;
+    box-shadow: 0 2px 8px #0002;
+    position: relative;
+    font-size: 1.04rem;
+    word-break: break-word;
+    transition: background 0.2s;
+    margin-left: auto;
+    margin-right: 0;
+    width: fit-content;
+    max-width: 420px;
+    min-width: 0;
+}
+
+.msgFromThem:hover {
+    background: #353535;
+}
+
+.msgFromMe,
+.msgFromThem {
+    animation: msgFadeIn 0.25s ease;
+}
+
+@keyframes msgFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

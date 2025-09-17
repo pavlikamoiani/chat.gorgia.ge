@@ -170,6 +170,14 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- Групповые сообщения ---
+    socket.on('send-group-message', async (msg) => {
+        // msg должен содержать groupId, text, senderId, time, imageUrl и т.д.
+        if (!msg || !msg.groupId) return;
+        // Отправить всем сокетам (или можно реализовать rooms)
+        io.emit('receive-group-message', msg);
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         let disconnectedUserId = null;

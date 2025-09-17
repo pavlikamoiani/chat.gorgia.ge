@@ -27,10 +27,9 @@ const MessagesArea = ({
                     {/* Sender's name above the message bubble */}
                     <div
                         className={
-                            [
-                                style.messageSenderAbove,
-                                msg.fromMe ? style.messageSenderRight : style.messageSenderLeft
-                            ].join(' ')
+                            msg.fromMe
+                                ? style.messageSenderMe
+                                : style.messageSenderThem
                         }
                     >
                         {msg.fromMe
@@ -42,6 +41,7 @@ const MessagesArea = ({
                         style={{ position: 'relative' }}
                     >
                         <div className={style.msgHoverOverlay}>
+
                             <button
                                 className={style.replyBtnTop}
                                 title="Reply"

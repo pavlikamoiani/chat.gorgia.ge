@@ -213,7 +213,7 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                 openFullscreenImage={openFullscreenImage}
                 handleReply={handleReply}
                 handleForward={handleForward}
-                selectedChat={selectedChat} // <-- Pass selectedChat prop
+                selectedChat={selectedChat}
             />
             {replyTo && (
                 <div className={style.replyPreview}>
