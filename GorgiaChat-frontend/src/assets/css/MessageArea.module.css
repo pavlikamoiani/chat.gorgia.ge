@@ -1,0 +1,54 @@
+.contextMenu {
+    position: fixed;
+    background: rgba(32, 34, 37, 0.98);
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px #000a;
+    min-width: 220px;
+    padding: 8px;
+    border: 1px solid #232428;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 15px;
+    user-select: none;
+    animation: fadeIn 0.15s;
+}
+
+.contextMenuBtn {
+    background: none;
+    border: none;
+    color: #fff;
+    width: 100%;
+    text-align: left;
+    padding: 12px 22px;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+    outline: none;
+}
+
+.contextMenuBtn:hover {
+    background: #35373c;
+}
+
+.contextMenuBtnForward {
+    color: #ffb347;
+}
+
+.contextMenuDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 5px 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

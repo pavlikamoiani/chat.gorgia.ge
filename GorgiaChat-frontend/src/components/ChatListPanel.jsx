@@ -2,15 +2,13 @@ import React, { useState } from 'react'
 import { MdChatBubble, MdGroups } from 'react-icons/md'
 import { RiEditBoxLine } from "react-icons/ri";
 import { FaUserPlus } from 'react-icons/fa'
-import { useSelector } from 'react-redux'
 import defaultInstance from '../api/defaultInstance'
 import { IoSearch } from "react-icons/io5";
 
-const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, setChatList, isGroupList, onNewGroup }) => {
+const ChatListPanel = ({ style, chatList, selectedChat, setSelectedChat, isGroupList, onNewGroup }) => {
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
     const [showResults, setShowResults] = useState(false)
-    const user = useSelector(state => state.auth.user)
 
     const handleSearch = async e => {
         const value = e.target.value

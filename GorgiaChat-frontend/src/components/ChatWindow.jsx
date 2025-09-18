@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import style from '../assets/css/ChatWindow.module.css'
 import { io } from 'socket.io-client'
-import { useNavigate } from 'react-router-dom'
 import ChatMain from './pages/chat/ChatMain'
 import ChatListPanel from './ChatListPanel'
 import { useSelector } from 'react-redux'
@@ -17,12 +16,6 @@ const ChatWindow = () => {
     const [myId, setMyId] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState(new Set());
     const socketRef = useRef(null)
-    const navigate = useNavigate()
-
-    const formatTime = date => {
-        const d = new Date(date)
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
 
     useEffect(() => {
         const fetchChatContacts = async () => {
