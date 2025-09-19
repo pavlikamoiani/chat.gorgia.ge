@@ -111,7 +111,6 @@ router.get('/search-user', async (req, res) => {
     }
 });
 
-// Роут для загрузки изображений
 router.post('/upload-image', upload.single('image'), (req, res) => {
     try {
         if (!req.file) {
@@ -145,7 +144,6 @@ router.post('/messages/send', async (req, res) => {
     }
 });
 
-// Обновление роута получения сообщений для включения URL изображений
 router.get('/messages/:userId/:otherUserId', async (req, res) => {
     const { userId, otherUserId } = req.params;
     try {
@@ -233,7 +231,6 @@ router.post('/group/create', async (req, res) => {
     }
 });
 
-// List groups for a user
 router.get('/group/list', async (req, res) => {
     const userId = req.query.userId || req.headers['x-user-id'];
     if (!userId) return res.status(400).json({ error: 'Missing userId' });
@@ -246,7 +243,6 @@ router.get('/group/list', async (req, res) => {
             [userId]
         );
 
-        // For each group, get last message and time, and if it's an image
         const groupIds = groups.map(g => g.id);
         let lastMessages = [];
         if (groupIds.length > 0) {
@@ -263,7 +259,6 @@ router.get('/group/list', async (req, res) => {
             );
             lastMessages = rows;
         }
-        // Map groupId -> last message/time/isImage
         const lastMsgMap = {};
         lastMessages.forEach(row => {
             lastMsgMap[row.group_id] = {
@@ -290,7 +285,6 @@ router.get('/group/list', async (req, res) => {
     }
 });
 
-// Send group message
 router.post('/group/send-message', async (req, res) => {
     const { groupId, senderId, text, time, parentMessageId, forwarded, imageUrl } = req.body;
     if (!groupId || !senderId || (!text && !imageUrl) || !time) {
@@ -308,7 +302,6 @@ router.post('/group/send-message', async (req, res) => {
     }
 });
 
-// Get group messages
 router.get('/group/messages/:groupId', async (req, res) => {
     const { groupId } = req.params;
     try {
@@ -323,7 +316,6 @@ router.get('/group/messages/:groupId', async (req, res) => {
     }
 });
 
-// Get group members (for showing sender names in group chat)
 router.get('/group/members/:groupId', async (req, res) => {
     const { groupId } = req.params;
     try {

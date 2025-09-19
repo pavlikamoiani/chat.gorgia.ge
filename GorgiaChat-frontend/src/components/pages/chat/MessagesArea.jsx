@@ -9,6 +9,8 @@ const formatTime = (timestamp) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+const EMOJI_LIST = ['👍', '😂', '❤️', '🔥', '😮', '😢'];
+
 const MessagesArea = ({
     style,
     messages,
@@ -21,6 +23,7 @@ const MessagesArea = ({
 }) => {
     const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, msg: null });
     const contextMenuRef = useRef(null);
+    const [reactions, setReactions] = useState({});
 
     useEffect(() => {
         if (!contextMenu.visible) return;
@@ -43,7 +46,6 @@ const MessagesArea = ({
         });
     };
 
-    // Utility to extract filename from URL
     const getFilenameFromUrl = (url) => {
         try {
             const pathname = new URL(url, window.location.origin).pathname;
@@ -74,6 +76,14 @@ const MessagesArea = ({
                 console.error('Download error:', err);
             }
         }
+        setContextMenu({ ...contextMenu, visible: false });
+    };
+
+    const handleEmojiClick = (emoji) => {
+        setReactions(prev => ({
+            ...prev,
+            [contextMenu.msg.id]: emoji
+        }));
         setContextMenu({ ...contextMenu, visible: false });
     };
 
@@ -126,7 +136,6 @@ const MessagesArea = ({
                                             maxWidth: 180,
                                             maxHeight: 180,
                                             borderRadius: 8,
-                                            marginBottom: 6,
                                             cursor: 'pointer'
                                         }}
                                         onClick={() => openFullscreenImage(msg.image)}
@@ -154,6 +163,12 @@ const MessagesArea = ({
                                     </a>
                                 )}
                                 <span>{msg.text}</span>
+                                {/* emoji-реакция в правом нижнем углу bubble */}
+                                {reactions[msg.id] && (
+                                    <span className={MessageArea.emojiReactionBubble}>
+                                        {reactions[msg.id]}
+                                    </span>
+                                )}
                                 <span className={`${style.msgTimeOnHover} ${msg.fromMe ? style.timeRight : style.timeLeft}`}>
                                     {formatTime(msg.time)}
                                 </span>
@@ -197,6 +212,19 @@ const MessagesArea = ({
                             </button>
                         </>
                     )}
+                    <div className={MessageArea.contextMenuDivider} />
+                    <div className={MessageArea.contextMenuEmojiRow}>
+                        {EMOJI_LIST.map(emoji => (
+                            <button
+                                key={emoji}
+                                className={MessageArea.contextMenuEmojiBtn}
+                                onClick={() => handleEmojiClick(emoji)}
+                                title={emoji}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
             <div ref={messagesAreaRef} />
