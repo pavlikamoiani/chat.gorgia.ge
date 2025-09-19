@@ -5,6 +5,7 @@ import { FiSend } from 'react-icons/fi'
 import { FaReply, FaShare } from 'react-icons/fa'
 import { useCall } from '../../../contexts/CallContext'
 import { FiImage } from 'react-icons/fi'
+import { FiPlus } from 'react-icons/fi'
 import MessagesArea from './MessagesArea'
 
 const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chatList, onForward, usersById }) => {
@@ -245,25 +246,34 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                 </div>
             )}
             <form className={style.inputArea} onSubmit={handleSendWithReply}>
-                <button type="button" className={style.inputIconBtn} title="Attach">
-                    <MdCalendarToday size={20} color="#888" />
+                <button type="button" className={style.inputIconBtn} title="Attach" style={{ padding: '6px 12px' }}>
+                    <FiPlus size={20} />
                 </button>
-                <button
-                    type="button"
-                    className={style.inputIconBtn}
-                    title="Add image"
-                    onClick={handleImageIconClick}
-                    style={{ marginRight: 4 }}
-                >
-                    <FiImage size={20} color="#888" />
-                </button>
+                <input
+                    type="text"
+                    className={style.inputBox}
+                    placeholder={`Написать ${selectedChat?.name || ''}`}
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                />
                 <button
                     type="button"
                     className={style.inputIconBtn}
                     title="Add file"
                     onClick={handleFileIconClick}
                 >
-                    <FiFile size={20} color="#888" />
+                    <FiFile size={18} />
+                </button>
+                <button
+                    type="button"
+                    className={style.inputIconBtn}
+                    title="Add image"
+                    onClick={handleImageIconClick}
+                >
+                    <FiImage size={18} />
+                </button>
+                <button type="submit" className={style.inputIconBtn} title="Send">
+                    <FiSend size={18} />
                 </button>
                 <input
                     type="file"
@@ -279,16 +289,6 @@ const ChatMain = ({ style, selectedChat, input, setInput, messages, onSend, chat
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,application/zip,application/x-rar-compressed"
                     onChange={handleFileChange}
                 />
-                <input
-                    type="text"
-                    className={style.inputBox}
-                    placeholder="Type a message"
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                />
-                <button type="submit" className={style.sendBtn} title="Send">
-                    <FiSend size={20} color="#fff" />
-                </button>
             </form>
             {showForwardModal && (
                 <div className={style.forwardModalOverlay}>

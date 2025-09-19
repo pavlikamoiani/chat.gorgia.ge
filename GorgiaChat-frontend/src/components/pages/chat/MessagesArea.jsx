@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { FaReply, FaShare } from 'react-icons/fa'
 import { FiFile, FiDownload } from 'react-icons/fi'
 import MessageArea from '../../../assets/css/MessageArea.module.css'
+import defaultinstance from '../../../api/defaultInstance';
 
 const formatTime = (timestamp) => {
     if (!timestamp) return '';
@@ -128,6 +129,19 @@ const MessagesArea = ({
                                     padding: msg.image ? 0 : undefined
                                 }}
                             >
+                                {/* Add reply preview display */}
+                                {msg.replyTo && (
+                                    <div className={style.replyPreviewInMsg}>
+                                        <strong>
+                                            {msg.replyTo.fromMe
+                                                ? "You"
+                                                : (usersById && usersById[msg.replyTo.senderId]
+                                                    ? usersById[msg.replyTo.senderId].username
+                                                    : "Unknown")}
+                                        </strong>: {msg.replyTo.text}
+                                    </div>
+                                )}
+
                                 {msg.image && (
                                     <img
                                         src={msg.image}
@@ -186,6 +200,7 @@ const MessagesArea = ({
                         top: contextMenu.y,
                         left: contextMenu.x,
                         zIndex: 99999
+
                     }}
                 >
                     <button
